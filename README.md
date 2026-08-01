@@ -7,7 +7,35 @@ Farde est une application web autonome développée dans le cadre d’**Eigrutel
 Elle permet de réunir dans un même classeur visuel les références, personnages, expressions, poses, costumes, objets, décors, palettes, indications de style, éléments de continuité et idées visuelles d’un projet.
 
 ## Aperçu
-
+<table>
+  <tr>
+    <td><img src="docs/images/farde-mobile-main.png" alt="Accueil mobile vide"></td>
+    <td><img src="docs/images/farde-mobile-toutessections.png" alt="Intercalaire toutes sections"></td>
+    <td><img src="docs/images/farde-mobile-fiche.png" alt="Fiche mobile"></td>
+        <td><img src="docs/images/farde-mobile-info1.png" alt="Infos"></td>
+  </tr>
+  <tr>
+    <td align="center">Accueil</td>
+    <td align="center">Intercalaire toutes sections</td>
+    <td align="center">Fiche</td>
+        <td align="center">Infos</td>
+  </tr>
+</table>
+<table>
+  <tr>
+    <td><img src="docs/images/farde-mobile-info2.png" alt="Infos"></td>
+    <td><img src="docs/images/farde-reglages.png" alt="Réglages"></td>
+    <td><img src="docs/images/farde-mobile-diaporama.png" alt="Diaporama mobile"></td>
+    <td><img src="docs/images/farde-ordi-tri-rapide.png" alt="Diaporama mobile"></td>
+  </tr>
+  <tr>
+    <td align="center">Infos</td>
+    <td align="center">Réglages</td>
+    <td align="center">Diaporama</td>
+    <td align="center">Version ordi , tri rapide</td>
+  </tr>
+</table>
+![Aperçu de Farde](docs/images/farde-ordi.png)
 ![Aperçu de Farde](farde-fr.png)
 
 ## Fonctionnalités principales
