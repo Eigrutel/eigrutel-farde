@@ -1,0 +1,1978 @@
+<!doctype html>
+<!-- Eigrutel Lab - Atelier d'outils libres pour la bande dessinée
+Programme conçu et développé par Simon Léturgie dans le cadre d'Eigrutel BD Academy.
+Nom : farde
+Version : 1.0.0
+Date : 01-08-2026
+JJ Code : GNU AGPL v3.0 ou version ultérieure.
+Documentation et modèles : CC BY-SA 4.0, sauf mention contraire.
+Marques, logos et signes distinctifs Eigrutel / Eigrutel Lab / Eigrutel BD Academy : réservés. -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Farde</title>
+<meta name="author" content="Simon Léturgie">
+<meta name="application-name" content="Farde">
+<meta name="version" content="1.0.0">
+<meta name="date" content="2026-08-01">
+<meta name="apple-mobile-web-app-title" content="Farde">
+<link rel="icon" type="image/png" href="favicon/favclasseur.png">
+<link rel="apple-touch-icon" href="favicon/favclasseur.png">
+<style>
+/* Palette et variables globales / Global palette and variables */
+:root{
+  --bleu:#1F3A44;
+  --rouge:#A63D40;
+  --ocre:#C47A2C;
+  --fond:#F4F1EA;
+  --papier:#FAFAF7;
+  --txt:#1f2a2d;
+  --muted:#687275;
+  --line:rgba(31,58,68,.14);
+  --shadow:0 10px 24px rgba(31,58,68,.10);
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--fond);color:var(--txt)}
+button,input,textarea,select{font:inherit}
+button{border:0;cursor:pointer}
+button:disabled{opacity:.45;cursor:not-allowed}
+.hidden{display:none!important}
+/* Structure générale de l’application / Main application layout */
+.app{min-height:100dvh;display:flex;flex-direction:column}
+/* En-tête, titre et commandes / Header, title and controls */
+.top{position:sticky;top:0;z-index:20;background:rgba(250,250,247,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:14px 16px 12px}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:12px}
+.kicker{display:inline-flex;align-items:center;gap:8px;color:var(--rouge);font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
+.kicker:before,.kicker:after{content:"";width:22px;height:1px;background:currentColor;opacity:.65}
+h1{margin:2px 0 0;font-size:clamp(28px,5vw,46px);line-height:.96;letter-spacing:-.055em;color:var(--bleu)}
+.topActions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.btn{min-height:40px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--bleu);padding:0 13px;font-size:12px;font-weight:850;box-shadow:none;display:inline-flex;align-items:center;justify-content:center;text-align:center;gap:6px;text-decoration:none}.btn.primary{min-height:44px;background:var(--rouge);border-color:var(--rouge);color:#fff;padding:0 18px}.btn.icon{width:42px;min-width:42px;padding:0;display:inline-flex;align-items:center;justify-content:center}.btn.gearIcon svg{width:22px;height:22px;stroke:var(--bleu);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}.btn.gearIcon svg circle{fill:var(--papier);stroke:var(--bleu);stroke-width:2}.btn.gearIcon:hover{background:var(--bleu);border-color:var(--bleu)}.btn.gearIcon:hover svg{stroke:#fff}.btn.gearIcon:hover svg circle{fill:var(--bleu);stroke:#fff}.btn.infoIcon{font-size:18px;font-weight:950;line-height:1;color:var(--bleu)}.btn.danger{background:rgba(166,61,64,.09);border-color:rgba(166,61,64,.26);color:var(--rouge)}.btn.ghost{background:transparent}.fileInput{display:none}.filters{display:grid;grid-template-columns:minmax(160px,260px) minmax(180px,1fr) auto;gap:8px;align-items:center}.filters select,.filters input{min-height:38px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--bleu);padding:0 12px;font-size:12px;font-weight:850;outline:0}.filters input{color:var(--txt);font-weight:750}/* Grille des fiches / Card grid */
+.main{width:min(1180px,100%);margin:0 auto;padding:16px}.summary{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 12px;color:var(--muted);font-size:12px;font-weight:750}.activeSection{display:inline-flex;align-items:center;gap:6px}.sectionDot{width:9px;height:9px;border-radius:999px;background:var(--rouge);box-shadow:0 0 0 3px rgba(166,61,64,.10)}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(154px,1fr));gap:10px}.card{position:relative;aspect-ratio:4/5;border-radius:16px;background:#E7E1D7;border:1px solid rgba(31,58,68,.14);box-shadow:0 8px 18px rgba(31,58,68,.09);overflow:hidden;transition:transform .12s ease,box-shadow .12s ease;cursor:grab;touch-action:pan-y;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}.card:hover{transform:translateY(-1px);box-shadow:0 12px 24px rgba(31,58,68,.13)}.card.dragReady{outline:2px solid rgba(31,58,68,.26);outline-offset:2px}.card.dragging{opacity:.94;cursor:grabbing;box-shadow:0 18px 34px rgba(31,58,68,.22);z-index:30;touch-action:none}.card.dropTarget{outline:3px solid var(--rouge);outline-offset:3px}body.dragging-card{overflow:hidden;touch-action:none}.card:before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--catColor,var(--bleu));z-index:3}.card img{width:100%;height:100%;object-fit:contain;display:block;background:#F7F2E8}.localImageSlot{width:100%;height:100%;display:block;background:#F7F2E8}.fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;background:var(--catColor,var(--bleu));color:#fff;text-align:center;padding:12px}.fallback b{font-size:20px;line-height:1;font-weight:950;letter-spacing:-.06em}.fallback small{margin-top:7px;font-size:8px;line-height:1.2;font-weight:900;letter-spacing:.12em;text-transform:uppercase;opacity:.78}.cardText{position:absolute;left:7px;right:7px;bottom:7px;z-index:4;padding:7px 8px;border-radius:12px;background:rgba(250,250,247,.92);color:var(--bleu);font-size:11px;font-weight:900;line-height:1.12;box-shadow:0 4px 12px rgba(31,58,68,.12);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.favMark{position:absolute;left:9px;top:11px;z-index:5;width:8px;height:8px;border-radius:50%;background:var(--rouge);box-shadow:0 0 0 3px rgba(250,250,247,.86)}.empty{margin:36px auto;max-width:460px;text-align:center;color:var(--muted);font-size:14px;background:#fff;border:1px dashed var(--line);border-radius:18px;padding:20px}.footer{margin-top:auto;text-align:center;padding:14px 16px;border-top:1px solid var(--line);background:var(--papier)}.footer a{color:var(--bleu);text-decoration:none;font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}/* Panneaux latéraux et fenêtres / Side panels and dialogs */
+.drawer{position:fixed;inset:0;z-index:50;display:none;background:rgba(31,58,68,.28);backdrop-filter:blur(3px)}.drawer.open{display:block}.panel{position:absolute;right:0;top:0;height:100%;width:min(470px,100%);background:var(--papier);border-left:1px solid var(--line);box-shadow:-18px 0 45px rgba(31,58,68,.18);padding:16px;overflow:auto}.panelHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.panelHead h2{margin:0;color:var(--bleu);font-size:20px;letter-spacing:-.02em}.close{width:38px;height:38px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--bleu);font-size:24px;line-height:1}.field{display:grid;gap:6px;margin:0 0 12px}.field label{font-size:10px;font-weight:900;letter-spacing:.10em;text-transform:uppercase;color:var(--muted)}.field input,.field textarea,.field select{width:100%;border:1px solid var(--line);background:#fff;color:var(--txt);border-radius:14px;padding:11px 12px;outline:0}.field textarea{min-height:92px;resize:vertical;line-height:1.45}.field input:focus,.field textarea:focus,.field select:focus{border-color:rgba(166,61,64,.45);box-shadow:0 0 0 4px rgba(166,61,64,.10)}.panelActions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.checkOption{display:flex;align-items:flex-start;gap:9px;padding:10px;border:1px solid var(--line);background:#fff;border-radius:14px;color:var(--bleu);font-size:12px;font-weight:850;line-height:1.35}.checkOption input{width:18px;height:18px;margin:0;accent-color:var(--rouge);flex:0 0 auto}.checkOption small{display:block;margin-top:2px;color:var(--muted);font-size:11px;font-weight:700}.previewBox{height:260px;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#E7E1D7;display:flex;align-items:center;justify-content:center}.previewBox img{width:100%;height:100%;object-fit:contain;display:block;background:#E7E1D7}.previewBox .fallback{position:static;width:100%;height:100%;border-radius:0}.imageTools{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 10px}.imageHint{font-size:11px;line-height:1.4;color:var(--muted);margin:0 0 12px}.note{font-size:12px;line-height:1.45;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px}.infoSection{border:1px solid var(--line);background:#fff;border-radius:16px;padding:12px;margin:0 0 10px}.infoSection h3{margin:0 0 6px;color:var(--bleu);font-size:15px;letter-spacing:-.02em}.infoSection p{margin:0;color:var(--txt);font-size:13px;line-height:1.45}.settingsGrid{display:grid;gap:10px}.settingsGroup{border:1px solid var(--line);background:#fff;border-radius:16px;padding:12px}.settingsGroup h3{margin:0 0 8px;color:var(--bleu);font-size:14px;letter-spacing:-.01em}.settingsGroup .panelActions{margin:0}.printTitle{display:none}.status{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:80;max-width:calc(100vw - 32px);border-radius:999px;background:var(--bleu);color:#fff;padding:9px 13px;font-size:12px;font-weight:800;box-shadow:0 10px 22px rgba(31,58,68,.24);opacity:0;pointer-events:none;transition:opacity .18s ease}.status.show{opacity:1}
+/* Aperçu plein écran et diaporama / Full-screen preview and slideshow */
+.zoomDrawer{z-index:70}
+.zoomPanel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:90vw;height:90dvh;background:var(--papier);border:1px solid var(--line);border-radius:22px;box-shadow:0 24px 70px rgba(31,58,68,.28);padding:12px;display:grid;grid-template-rows:auto 1fr;gap:10px}
+.zoomHead{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:38px}
+.zoomHead h2{margin:0;color:var(--bleu);font-size:15px;line-height:1.2;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.zoomBody{min-height:0;border-radius:16px;overflow:hidden;background:#E7E1D7;border:1px solid var(--line);display:flex;align-items:center;justify-content:center}
+.zoomBody img{width:100%;height:100%;object-fit:contain;display:block;background:#F7F2E8}
+.zoomBody .fallback{position:static;width:100%;height:100%;border-radius:0}
+/* Adaptation aux écrans étroits / Narrow-screen layout */
+@media(max-width:700px){.zoomPanel{width:92vw;height:88dvh;border-radius:18px;padding:10px}.zoomBtn{right:39px}.cardToolBtn{width:26px;height:26px}}@media(max-width:760px){.top{padding:10px}.head{align-items:center}.kicker{display:none}h1{font-size:25px}.topActions{gap:6px}.btn.icon{width:40px;min-width:40px}.filters{grid-template-columns:1fr 1fr}.filters .primary{grid-column:1/-1}.main{padding:10px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.card{border-radius:14px}.panel{width:100%;border-left:0}.summary{font-size:11px;margin-bottom:9px}.cardText{font-size:10.5px}}@media(max-width:380px){.grid{gap:7px}.cardText{left:6px;right:6px;bottom:6px;padding:6px;font-size:10px}}/* Mise en page PDF et impression / PDF and print layout */
+@media print{.top,.drawer,.status{display:none!important}body{background:#fff}.printTitle{display:block;padding:0 0 10mm;margin:0 0 6mm;border-bottom:1px solid #ccc;color:#1F3A44;font-weight:900;font-size:18pt;letter-spacing:-.03em}.main{width:100%;padding:0}.summary{display:none}.grid{grid-template-columns:repeat(4,1fr);gap:8px}.card{break-inside:avoid;box-shadow:none;border-color:#bbb}.footer{border-top:1px solid #ccc;background:#fff}}
+
+/* v3 — fiche visuelle avec barre de boutons sous l’image + bouton de déplacement dédié */
+.card{
+  aspect-ratio:auto;
+  min-height:240px;
+  display:grid;
+  grid-template-rows:minmax(0,1fr) 40px;
+  overflow:hidden;
+  cursor:default;
+}
+.card:hover{transform:translateY(-1px)}
+.cardImage{
+  position:relative;
+  min-height:0;
+  overflow:hidden;
+  background:#F7F2E8;
+  border-radius:16px 16px 0 0;
+}
+.cardImage>img,.cardImage>.localImageSlot{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+}
+.cardImage>.fallback{position:absolute}
+.cardControls{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:6px;
+  min-height:40px;
+  padding:5px 7px;
+  border-top:1px solid rgba(31,58,68,.12);
+  background:rgba(250,250,247,.96);
+}
+.cardToolBtn{
+  position:static;
+  z-index:6;
+  width:30px;
+  height:30px;
+  flex:0 0 30px;
+  border-radius:999px;
+  border:1px solid rgba(31,58,68,.16);
+  background:#fff;
+  color:var(--bleu);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  line-height:1;
+}
+.cardToolBtn:hover{background:var(--bleu);border-color:var(--bleu);color:#fff}
+.zoomBtn{font-size:22px;font-weight:950}
+.editBtn{font-size:15px}
+.moveBtn{font-size:17px;cursor:grab;touch-action:none}
+.moveBtn:active{cursor:grabbing}
+.zoomBody{touch-action:pan-y;position:relative}
+.zoomBody::before,.zoomBody::after{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:34px;
+  height:46px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:rgba(31,58,68,.42);
+  background:rgba(250,250,247,.72);
+  font-size:24px;
+  font-weight:900;
+  pointer-events:none;
+}
+.zoomBody::before{content:'‹';left:10px}
+.zoomBody::after{content:'›';right:10px}
+@media(max-width:700px){
+  .card{min-height:220px}
+  .cardControls{min-height:38px;padding:5px 6px}
+  .cardToolBtn{width:29px;height:29px;flex-basis:29px}
+  .zoomBtn{font-size:22px}
+  .zoomBody::before,.zoomBody::after{display:none}
+}
+
+
+
+/* v4 — correction ferme : fiches de hauteur identique + boutons sous image, jamais superposés */
+.grid{
+  align-items:start;
+}
+.card{
+  position:relative !important;
+  aspect-ratio:auto !important;
+  height:300px !important;
+  min-height:300px !important;
+  display:grid !important;
+  grid-template-rows:minmax(0,1fr) 46px !important;
+  overflow:hidden !important;
+  cursor:default !important;
+  background:#E7E1D7;
+}
+.cardImage{
+  position:relative !important;
+  min-height:0 !important;
+  height:auto !important;
+  overflow:hidden !important;
+  border-radius:16px 16px 0 0;
+  background:#F7F2E8;
+}
+.cardImage>img,
+.cardImage>.localImageSlot,
+.cardImage>.localImageSlot>img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:contain !important;
+  display:block !important;
+  background:#F7F2E8;
+}
+.cardImage>.fallback,
+.cardImage .localImageSlot>.fallback{
+  position:absolute !important;
+  inset:0 !important;
+}
+.cardControls{
+  position:relative !important;
+  z-index:10 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-end !important;
+  gap:7px !important;
+  height:46px !important;
+  min-height:46px !important;
+  padding:6px 8px !important;
+  border-top:1px solid rgba(31,58,68,.12) !important;
+  background:rgba(250,250,247,.98) !important;
+}
+.cardToolBtn{
+  position:static !important;
+  inset:auto !important;
+  width:32px !important;
+  height:32px !important;
+  min-width:32px !important;
+  flex:0 0 32px !important;
+  transform:none !important;
+  border-radius:999px !important;
+}
+.zoomBtn{font-size:24px !important;}
+.editBtn{font-size:15px !important;}
+.moveBtn{font-size:18px !important;cursor:grab !important;touch-action:none !important;}
+.cardText{
+  left:8px !important;
+  right:8px !important;
+  bottom:8px !important;
+  z-index:5 !important;
+}
+@media(max-width:760px){
+  .card{height:260px !important;min-height:260px !important;grid-template-rows:minmax(0,1fr) 44px !important;}
+  .cardControls{height:44px !important;min-height:44px !important;padding:6px !important;}
+  .cardToolBtn{width:31px !important;height:31px !important;min-width:31px !important;flex-basis:31px !important;}
+}
+@media(max-width:380px){
+  .card{height:240px !important;min-height:240px !important;}
+}
+
+
+
+/* v5 — cartes plus basses (-15%) + bouton d’import en batterie */
+.filters{grid-template-columns:minmax(150px,220px) minmax(160px,250px) minmax(180px,1fr) auto auto !important;}
+.projectNameInput{box-shadow:none!important;font-weight:900!important;color:var(--bleu)!important;font-size:14px!important;border-radius:16px!important;padding:0 15px!important;background:#fff!important;}
+.card{
+  position:relative !important;
+  inset:auto !important;
+  height:204px !important;
+  min-height:204px !important;
+  max-height:204px !important;
+  aspect-ratio:auto !important;
+  display:grid !important;
+  grid-template-rows:minmax(0,1fr) 42px !important;
+  overflow:hidden !important;
+}
+.cardImage{min-height:0 !important;height:auto !important;position:relative !important;overflow:hidden !important;}
+.cardImage>img,.cardImage>.localImageSlot{width:100% !important;height:100% !important;object-fit:contain !important;}
+.cardControls{height:42px !important;min-height:42px !important;padding:5px 7px !important;}
+.cardToolBtn{width:30px !important;height:30px !important;min-width:30px !important;flex:0 0 30px !important;}
+@media(max-width:760px){
+  .filters{grid-template-columns:1fr 1fr !important;}
+  .filters #projectName{grid-column:1/-1;grid-row:1;}
+  .filters input[type=search]{grid-column:1/-1;grid-row:2;}
+  .filters #sectionFilter{grid-column:1/-1;grid-row:3;}
+  .filters #batchImagesBtn{grid-column:1;}
+  .filters #addBtn{grid-column:2;}
+  .card{height:187px !important;min-height:187px !important;max-height:187px !important;grid-template-rows:minmax(0,1fr) 40px !important;}
+  .cardControls{height:40px !important;min-height:40px !important;padding:5px 6px !important;}
+  .cardToolBtn{width:29px !important;height:29px !important;min-width:29px !important;flex-basis:29px !important;}
+}
+@media(max-width:380px){.card{height:180px !important;min-height:180px !important;max-height:180px !important;}}
+
+
+
+/* v6 — sauvegarde ZIP uniquement, vrai champ titre, menu intercalaires coloré */
+.filters{grid-template-columns:minmax(170px,260px) minmax(160px,250px) minmax(180px,1fr) auto auto !important;}
+.projectNameInput{box-shadow:none!important;border-color:var(--line)!important;}
+.sectionPicker{position:relative;min-height:38px;z-index:30;}
+.sectionPickerBtn{width:100%;height:38px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--bleu);padding:0 12px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:900;text-align:left;}
+.sectionPickerBtn:focus{outline:0;border-color:rgba(166,61,64,.45);box-shadow:0 0 0 4px rgba(166,61,64,.10)}
+.sectionPickerDot{width:10px;height:10px;border-radius:50%;background:var(--bleu);box-shadow:0 0 0 3px rgba(31,58,68,.10);flex:0 0 10px;}
+#sectionPickerLabel{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
+.sectionPickerArrow{font-size:15px;line-height:1;color:var(--muted);font-weight:900;}
+.sectionPickerMenu{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--papier);border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 34px rgba(31,58,68,.18);padding:6px;max-height:360px;overflow:auto;z-index:80;}
+.sectionPickerOption{width:100%;min-height:38px;border:0;background:transparent;border-radius:12px;color:var(--txt);display:flex;align-items:center;gap:9px;padding:0 10px;text-align:left;font-size:13px;font-weight:800;}
+.sectionPickerOption:hover,.sectionPickerOption.active{background:#fff;}
+.sectionPickerOption .dot{width:11px;height:11px;border-radius:999px;box-shadow:0 0 0 3px rgba(31,58,68,.08);flex:0 0 11px;}
+.cardControls{justify-content:flex-end!important;gap:8px!important;}
+.moveBtn svg{width:18px;height:18px;stroke:currentColor;stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round;display:block;}
+@media(max-width:760px){
+  .filters{grid-template-columns:1fr 1fr !important;}
+  .filters #projectName{grid-column:1/-1;grid-row:1;}
+  .filters .sectionPicker{grid-column:1/-1;grid-row:3;}
+}
+
+
+
+/* v7 — recherche en board, menu coloré plein, focus image avec navigation et lecture */
+.sectionPickerBtn{background:var(--pickerColor,#1F3A44)!important;color:#fff!important;border-color:rgba(31,58,68,.22)!important;box-shadow:none!important;}
+.sectionPickerBtn .sectionPickerDot{display:none!important;}
+.sectionPickerBtn .sectionPickerArrow{color:rgba(255,255,255,.82)!important;}
+.sectionPickerOption{color:#fff!important;justify-content:flex-start;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);border-radius:0!important;}
+.sectionPickerOption .dot{display:none!important;}
+.sectionPickerOption:hover,.sectionPickerOption.active{filter:brightness(1.06);box-shadow:inset 0 0 0 2px rgba(255,255,255,.35);}
+.zoomBody.zoomFade img,.zoomBody.zoomFade .fallback{animation:zoomFade .28s ease both}
+.zoomBody.zoomSlideNext img,.zoomBody.zoomSlideNext .fallback{animation:zoomSlideNext .32s ease both}
+.zoomBody.zoomSlidePrev img,.zoomBody.zoomSlidePrev .fallback{animation:zoomSlidePrev .32s ease both}
+@keyframes zoomFade{from{opacity:.18}to{opacity:1}}
+@keyframes zoomSlideNext{from{opacity:.55;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+@keyframes zoomSlidePrev{from{opacity:.55;transform:translateX(-24px)}to{opacity:1;transform:translateX(0)}}
+.summary.searchMode .activeSection{display:inline-flex;}
+.summary:not(.searchMode) .activeSection{display:none;}
+.zoomPanel{grid-template-rows:auto 1fr auto!important;}
+.zoomNav{display:flex;align-items:center;justify-content:center;gap:10px;min-height:42px;}
+.zoomNavBtn{width:42px;height:36px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--bleu);font-size:22px;font-weight:950;display:inline-flex;align-items:center;justify-content:center;line-height:1;}
+.zoomNavBtn:hover,.zoomNavBtn.active{background:var(--bleu);border-color:var(--bleu);color:#fff;}
+.zoomPlayBtn{width:auto;padding:0 14px;font-size:12px;letter-spacing:.02em;}
+@media(max-width:700px){.zoomNav{gap:8px}.zoomNavBtn{width:40px;height:34px}.zoomPlayBtn{padding:0 12px}}
+
+
+/* v10 — titres infos colorés, export PDF fiches retiré */
+.sectionPickerBtn{background:#fff!important;color:var(--bleu)!important;border-color:var(--pickerColor,#1F3A44)!important;box-shadow:inset 8px 0 0 var(--pickerColor,#1F3A44)!important;padding-left:18px!important;}
+.sectionPickerBtn .sectionPickerDot{display:none!important;}
+.sectionPickerBtn .sectionPickerArrow{color:var(--bleu)!important;}
+.sectionPickerOption{background:linear-gradient(90deg,var(--sectionColor,#1F3A44) 0 12px,#fff 12px)!important;color:var(--bleu)!important;border-radius:0!important;box-shadow:none!important;padding-left:20px!important;border-bottom:1px solid rgba(31,58,68,.10)!important;}
+.sectionPickerOption:last-child{border-bottom:0!important;}
+.sectionPickerOption .dot{display:none!important;}
+.sectionPickerOption:hover,.sectionPickerOption.active{background:linear-gradient(90deg,var(--sectionColor,#1F3A44) 0 12px,rgba(31,58,68,.06) 12px)!important;filter:none!important;box-shadow:none!important;}
+.zoomBody.zoomFade img,.zoomBody.zoomFade .fallback{animation:zoomFade .28s ease both}
+.zoomBody.zoomSlideNext img,.zoomBody.zoomSlideNext .fallback,.zoomBody.zoomSlidePrev img,.zoomBody.zoomSlidePrev .fallback{animation:none!important}
+.printMeta{display:none}
+
+
+
+
+.infoSection{padding:0 0 12px!important;overflow:hidden}
+.infoSection h3{margin:0 0 10px!important;padding:9px 12px!important;background:var(--infoColor,var(--bleu))!important;color:#fff!important;font-size:15px!important;letter-spacing:.01em!important}
+.infoSection p{margin-left:12px!important;margin-right:12px!important}
+@page{size:A4 portrait;margin:12mm}
+@media print{
+  body.print-mode-board .grid{grid-template-columns:repeat(4,1fr)!important;gap:8px!important}
+  body.print-mode-board .card{height:58mm!important;min-height:58mm!important;max-height:58mm!important;grid-template-rows:1fr!important;border-radius:0!important;box-shadow:none!important}
+  body.print-mode-board .cardControls{display:none!important}
+  body.print-mode-board .cardImage{border-radius:0!important}
+  body.print-mode-sheet .grid{grid-template-columns:repeat(2,1fr)!important;gap:7mm!important;align-items:start!important}
+  body.print-mode-sheet .card{height:124mm!important;min-height:124mm!important;max-height:124mm!important;grid-template-rows:84mm auto!important;border-radius:0!important;box-shadow:none!important;background:#fff!important;break-inside:avoid!important;page-break-inside:avoid!important}
+  body.print-mode-sheet .card:nth-child(4n){break-after:page!important;page-break-after:always!important}
+  body.print-mode-sheet .cardControls{display:none!important}
+  body.print-mode-sheet .cardImage{border-radius:0!important;border:1px solid #ddd!important;background:#fff!important}
+  body.print-mode-sheet .printMeta{display:block!important;padding:4mm 0 0;color:#1f2a2d;font-size:9pt;line-height:1.25;overflow:hidden}
+  body.print-mode-sheet .printMeta h3{margin:0 0 2mm;color:#1F3A44;font-size:12pt}
+  body.print-mode-sheet .printMeta p{margin:0 0 1.5mm}
+}
+
+
+/* v11 — annuler/rétablir + dépôt direct d’images */
+.btn.undoRedoIcon svg{width:20px;height:20px;stroke:var(--bleu);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.btn.undoRedoIcon:disabled svg{opacity:.35}
+.main.dropActive{outline:3px dashed rgba(166,61,64,.45);outline-offset:-10px;background:rgba(166,61,64,.035)}
+.dropHint{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:90;display:none;padding:18px 22px;border-radius:22px;background:rgba(31,58,68,.92);color:#fff;font-size:15px;font-weight:900;letter-spacing:.01em;box-shadow:0 18px 45px rgba(31,58,68,.28);pointer-events:none}
+.dropHint.show{display:block}
+@media(max-width:700px){.btn.undoRedoIcon{width:40px;min-width:40px}.btn.undoRedoIcon svg{width:19px;height:19px}}
+
+/* v13 — filtre favoris, tri rapide, statut image et PDF sobre */
+.favoriteFilterBtn.active,.quickSortBtn.active{background:var(--bleu);border-color:var(--bleu);color:#fff}
+.quickSortBtn.active{background:var(--rouge);border-color:var(--rouge)}
+.card.quick-sort{outline:2px solid rgba(166,61,64,.18);outline-offset:2px}
+.quickSortPanel{position:absolute;left:6px;right:6px;bottom:38px;z-index:8;display:none;grid-template-columns:repeat(6,1fr);gap:3px;padding:5px;background:rgba(250,250,247,.94);border:1px solid rgba(31,58,68,.14);box-shadow:0 6px 16px rgba(31,58,68,.14)}
+body.quick-sort-mode .quickSortPanel{display:grid}
+.quickSortDot{height:18px;border:1px solid rgba(31,58,68,.18);background:var(--dotColor);padding:0;border-radius:0}
+.quickSortDot.active{outline:2px solid var(--bleu);outline-offset:1px}
+.imageStatusBox{font-size:11px;line-height:1.35;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:14px;padding:9px 10px;margin:0 0 12px}
+.imageStatusBox strong{color:var(--bleu)}
+@media print{
+  .printExportCover{break-after:page;page-break-after:always;min-height:250mm;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;border-bottom:0}
+  .printExportCover h1{margin:0 0 8mm;color:#1F3A44;font-size:28pt;letter-spacing:-.04em}
+  .printExportCover p{margin:0;color:#687275;font-size:11pt}
+  .printExportToc{break-after:page;page-break-after:always}
+  .printExportToc h2{margin:0 0 8mm;color:#1F3A44;font-size:18pt}
+  .printExportToc ul{list-style:none;margin:0;padding:0}
+  .printExportToc li{display:flex;justify-content:space-between;border-bottom:1px solid #ddd;padding:3mm 0;font-size:11pt}
+  .printExportGroup{break-before:page;page-break-before:always}
+  .printExportGroup:first-of-type{break-before:auto;page-break-before:auto}
+}
+
+
+
+/* v15 — correction rebasée sur v13 : compact une colonne sans perdre les fonctions récentes */
+.btnSym{display:none;font-weight:950;font-size:18px;line-height:1}
+@media(max-width:620px){
+  .top{padding:8px 10px!important}
+  .head{display:grid!important;grid-template-columns:1fr auto!important;gap:8px!important;align-items:center!important;margin-bottom:8px!important}
+  .kicker{display:none!important}
+  h1{font-size:20px!important;line-height:1!important;letter-spacing:-.045em!important;white-space:nowrap!important;margin:0!important}
+  .topActions{gap:5px!important;flex-wrap:nowrap!important;justify-content:flex-end!important}
+  .topImportBtn,.topSaveBtn{display:none!important}
+  .btn.icon{width:34px!important;min-width:34px!important;height:34px!important;min-height:34px!important}
+  .undoRedoIcon{display:none!important}
+  .filters{grid-template-columns:1fr 1fr!important;gap:7px!important}
+  .filters #projectName{display:none!important}
+  .filters .sectionPicker{grid-column:1/-1!important;grid-row:auto!important}
+  .filters input[type=search]{grid-column:1/-1!important;grid-row:auto!important}
+  .favoriteFilterBtn,.quickSortBtn{min-height:38px!important;padding:0!important;border-radius:999px!important}
+  .favoriteFilterBtn .btnText,.quickSortBtn .btnText{display:none!important}
+  .favoriteFilterBtn .btnSym,.quickSortBtn .btnSym{display:inline!important}
+  .favoriteFilterBtn{grid-column:1!important}
+  .quickSortBtn{grid-column:2!important}
+  #batchImagesBtn{grid-column:1!important}
+  #addBtn{grid-column:2!important}
+  .main{padding:8px 10px!important}
+  .summary{margin-bottom:7px!important}
+}
+@media(min-width:621px){
+  .settingsProjectField,.settingsFileActions{display:none!important}
+}
+
+
+/* v16 — références liées */
+.linkedRefsBtn.active{background:var(--bleu);border-color:var(--bleu);color:#fff}
+.linkedRefsBtn:disabled{opacity:.38;cursor:not-allowed}
+.card.linkedRef{outline:1px dashed rgba(31,58,68,.32);outline-offset:-5px;background:#F2EEE6}
+.card.linkedRef:before{background:linear-gradient(90deg,var(--catColor,var(--bleu)),var(--rouge))}
+.linkedBadge{position:absolute;left:8px;top:8px;z-index:6;border-radius:999px;background:rgba(250,250,247,.94);color:var(--bleu);border:1px solid rgba(31,58,68,.16);font-size:9px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;padding:3px 6px;box-shadow:0 3px 10px rgba(31,58,68,.12)}
+.referenceLinksBox{border:1px solid var(--line);background:#fff;border-radius:14px;padding:10px;margin:0 0 12px}
+.referenceLinksTitle{font-size:10px;font-weight:900;letter-spacing:.10em;text-transform:uppercase;color:var(--rouge);margin:0 0 8px}
+.referenceLinksGrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.linkCheck{display:flex;align-items:center;gap:7px;border:1px solid rgba(31,58,68,.12);border-radius:10px;background:#FAFAF7;padding:7px 8px;color:var(--bleu);font-size:12px;font-weight:850;line-height:1.2}
+.linkCheck input{width:16px;height:16px;margin:0;accent-color:var(--rouge);flex:0 0 auto}
+.linkCheckDot{width:8px;height:8px;border-radius:999px;background:var(--linkColor,var(--bleu));flex:0 0 8px}
+@media(max-width:760px){
+  .filters{grid-template-columns:1fr 1fr!important;gap:7px!important}
+  .filters #favoriteFilterBtn{grid-column:1!important;grid-row:auto!important}
+  .filters #linkedRefsBtn{grid-column:2!important;grid-row:auto!important}
+  .filters #quickSortBtn{grid-column:1!important;grid-row:auto!important}
+  .filters #batchImagesBtn{grid-column:2!important;grid-row:auto!important}
+  .filters #addBtn{grid-column:1/-1!important;grid-row:auto!important}
+  .linkedRefsBtn .btnText{display:none!important}
+  .linkedRefsBtn .btnSym{display:inline!important}
+}
+
+
+/* v22 — accès direct au diaporama, contrôles symboles et export HTML du board actif */
+.btn.playIcon svg,.zoomPlayBtn svg{width:18px;height:18px;display:block;fill:currentColor;stroke:none}
+.btn.playIcon{color:var(--bleu)}
+.btn.playIcon:hover{background:var(--bleu);border-color:var(--bleu);color:#fff}
+.zoomPlayBtn{width:42px!important;padding:0!important;font-size:0!important}
+.zoomPlayBtn svg{width:17px;height:17px}
+.ficheZoomBtn{font-size:22px!important;line-height:1!important;margin-right:2px}
+.ficheZoomBtn:disabled{opacity:.35;cursor:not-allowed}
+
+
+/* v22 — export du diaporama du board actif */
+.zoomExportBtn svg{width:18px;height:18px;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.zoomExportBtn{margin-left:6px}
+@media(max-width:700px){.zoomExportBtn{margin-left:2px}}
+
+/* v23 — manuel intégré */
+.infoIntro{margin:0 0 16px;padding:14px 16px;border:1px solid rgba(31,58,68,.12);background:#fff;border-radius:14px;line-height:1.55}
+.infoManual{display:grid;gap:9px;margin-top:18px}
+.infoManualTitle{margin:0 0 2px;font-size:1.08rem;color:var(--bleu)}
+.manualSection{border:1px solid rgba(31,58,68,.13);background:rgba(255,255,255,.82);border-radius:13px;overflow:hidden}
+.manualSection summary{cursor:pointer;list-style:none;padding:13px 42px 13px 15px;font-weight:700;color:var(--bleu);position:relative;user-select:none}
+.manualSection summary::-webkit-details-marker{display:none}
+/* Clin d’œil étymologique en fin de manuel / Etymological note at the end of the manual */
+.infoNameNote{
+  margin-top:18px;
+  font-size:.78rem;
+  line-height:1.45;
+  color:var(--muted);
+}
+.fardeWord{
+  font-style:normal;
+  font-weight:800;
+  color:var(--accent, #d85b63);
+  letter-spacing:.04em;
+}
+.manualSection summary::after{content:'+';position:absolute;right:15px;top:50%;transform:translateY(-50%);font-size:1.25rem;font-weight:400;color:var(--rouge)}
+.manualSection[open] summary::after{content:'–'}
+.manualSection[open] summary{border-bottom:1px solid rgba(31,58,68,.1)}
+.manualBody{padding:13px 16px 16px;line-height:1.58;color:var(--texte)}
+.manualBody p{margin:0 0 10px}
+.manualBody p:last-child{margin-bottom:0}
+.manualBody ul,.manualBody ol{margin:7px 0 10px;padding-left:21px}
+.manualBody li+li{margin-top:5px}
+.manualBody strong{color:var(--bleu)}
+.manualKeys{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.manualKey{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border:1px solid rgba(31,58,68,.15);border-bottom-width:2px;background:#fff;border-radius:7px;font-size:.82rem}
+@media(max-width:700px){.manualSection summary{padding:12px 38px 12px 13px}.manualBody{padding:12px 13px 15px}}
+
+
+/* v24 — bascule bilingue */
+.languageSwitchRow{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--texte);font-size:13px}
+.languageToggleBtn{min-width:72px;text-transform:lowercase;font-weight:700}
+
+</style>
+</head>
+<body>
+<!-- Application principale / Main application -->
+<div class="app">
+  <header class="top">
+    <div class="head">
+      <div>
+        <div class="kicker">Bible graphique</div>
+        <h1>Farde</h1>
+      </div>
+      <div class="topActions">
+        <button class="btn icon playIcon" id="boardSlideshowBtn" title="Lancer le diaporama du board" aria-label="Lancer le diaporama du board"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13L18.5 12z"></path></svg></button>
+        <button class="btn icon infoIcon" id="infoBtn" title="Infos" aria-label="Infos">i</button>
+        <button class="btn icon gearIcon" id="settingsBtn" title="Réglages" aria-label="Réglages"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14"></path><path d="M5 17h14"></path><circle cx="9" cy="7" r="2.2"></circle><circle cx="15" cy="17" r="2.2"></circle></svg></button>
+        <button class="btn icon undoRedoIcon" id="undoBtn" title="Annuler" aria-label="Annuler" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7H4v5"></path><path d="M4 12c2.2-4.1 6.1-6.1 10.4-5.1 3.4.8 5.8 3.7 5.9 7.1.1 3.6-2.5 6.8-6.1 7.5"></path></svg></button>
+        <button class="btn icon undoRedoIcon" id="redoBtn" title="Rétablir" aria-label="Rétablir" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 7h5v5"></path><path d="M20 12c-2.2-4.1-6.1-6.1-10.4-5.1-3.4.8-5.8 3.7-5.9 7.1-.1 3.6 2.5 6.8 6.1 7.5"></path></svg></button>
+        <label class="btn topImportBtn" for="importZipFile">Importer</label>
+        <button class="btn primary topSaveBtn" id="saveBtn">Sauvegarder</button>
+        <input class="fileInput" id="importZipFile" type="file" accept="application/zip,.zip">
+      </div>
+    </div>
+    <div class="filters">
+      <input id="projectName" class="projectNameInput" type="text" placeholder="Titre du projet…" autocomplete="off">
+      <div class="sectionPicker" id="sectionPicker">
+        <button class="sectionPickerBtn" id="sectionPickerBtn" type="button" aria-haspopup="listbox" aria-expanded="false"><span class="sectionPickerDot"></span><span id="sectionPickerLabel">Toutes les sections</span><span class="sectionPickerArrow">⌄</span></button>
+        <div class="sectionPickerMenu hidden" id="sectionPickerMenu" role="listbox"></div>
+      </div>
+      <select id="sectionFilter" aria-label="Section" class="hidden"></select>
+      <input id="searchInput" type="search" placeholder="Rechercher titre, note, tags…">
+      <button class="btn favoriteFilterBtn" id="favoriteFilterBtn" type="button" title="Afficher seulement les références principales" aria-label="Favoris"><span class="btnSym">♡</span><span class="btnText">Favoris</span></button>
+      <button class="btn linkedRefsBtn" id="linkedRefsBtn" type="button" title="Afficher les références liées à ce board" aria-label="Références liées"><span class="btnSym">↔</span><span class="btnText">Réfs liées</span></button>
+      <button class="btn quickSortBtn" id="quickSortBtn" type="button" title="Classer vite les fiches par intercalaire" aria-label="Tri rapide"><span class="btnSym">□</span><span class="btnText">Tri rapide</span></button>
+      <button class="btn" id="batchImagesBtn" type="button">+ images</button>
+      <button class="btn primary" id="addBtn">+ fiche</button>
+      <input class="fileInput" id="batchImageFiles" type="file" accept="image/*" multiple>
+    </div>
+  </header>
+
+  <div class="printTitle" id="printTitle">Farde</div>
+  <main class="main">
+    <div class="summary">
+      <span class="activeSection"><span class="sectionDot"></span><span id="sectionLabel"></span></span>
+      <span id="countLabel"></span>
+    </div>
+    <section class="grid" id="grid" aria-label="Fiches visuelles"></section>
+  </main>
+
+  <footer class="footer">
+    <a href="https://www.stripmee.com" target="_blank" rel="noopener">Eigrutel BD Academy</a>
+  </footer>
+</div>
+
+<!-- Éditeur de fiche / Card editor -->
+<div class="drawer" id="editDrawer" aria-hidden="true">
+  <aside class="panel" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+    <div class="panelHead">
+      <h2 id="editTitle">Fiche visuelle</h2>
+      <button class="close" id="closeEdit" aria-label="Fermer">×</button>
+    </div>
+    <form id="entryForm">
+      <input type="hidden" id="entryId">
+      <div class="field">
+        <label for="entrySection">Section</label>
+        <select id="entrySection"></select>
+      </div>
+      <div class="referenceLinksBox hidden" id="referenceLinksBox">
+        <div class="referenceLinksTitle">Lier cette référence à</div>
+        <div class="referenceLinksGrid" id="referenceLinksGrid"></div>
+        <p class="imageHint">Visible uniquement pour les fiches de l’intercalaire Références. Les autres boards peuvent ensuite afficher ou masquer ces références liées.</p>
+      </div>
+      <div class="field">
+        <label for="entryTitle">Titre</label>
+        <input id="entryTitle" placeholder="Ex. Marin — face, Cabane principale, Palette nuit…">
+      </div>
+      <div class="field">
+        <label for="entryImage">Image</label>
+        <input id="entryImage" placeholder="images/cabane_01.jpg ou https://…">
+        <input type="hidden" id="entryImageId">
+      </div>
+      <div class="imageTools">
+        <button class="cardToolBtn ficheZoomBtn" type="button" id="editZoomBtn" title="Ouvrir l’image en focus" aria-label="Ouvrir l’image en focus">⌕</button>
+        <button class="btn" type="button" id="chooseImageBtn">Choisir une image</button>
+        <button class="btn danger" type="button" id="removeImageBtn">Retirer l’image</button>
+        <input class="fileInput" id="imageFile" type="file" accept="image/*">
+      </div>
+      <div class="previewBox" id="previewBox"></div>
+      <div class="imageStatusBox" id="imageStatusBox"><strong>Image :</strong> —</div>
+      <div class="field">
+        <label for="entryShort">Texte court optionnel</label>
+        <textarea id="entryShort" placeholder="Ce que je garde, détail à retenir, consigne de dessin…"></textarea>
+      </div>
+      <div class="field">
+        <label for="entryTags">Tags</label>
+        <input id="entryTags" placeholder="île, bois, costume, nuit, profil…">
+      </div>
+      <label class="checkOption">
+        <input id="entryShowText" type="checkbox">
+        <span>Afficher le texte court sur la fiche visuelle<small>À cocher seulement si la grille doit montrer une indication. Sinon la fiche reste image seule.</small></span>
+      </label>
+      <label class="checkOption">
+        <input id="entryFav" type="checkbox">
+        <span>Référence principale<small>Ajoute un repère rouge discret sur la fiche.</small></span>
+      </label>
+      <div class="panelActions">
+        <button class="btn primary" type="submit">Enregistrer</button>
+        <button class="btn" type="button" id="duplicateBtn">Dupliquer</button>
+        <button class="btn danger" type="button" id="deleteBtn">Supprimer</button>
+      </div>
+    </form>
+  </aside>
+</div>
+
+
+<!-- Réglages et changement de langue / Settings and language switch -->
+<div class="drawer" id="settingsDrawer" aria-hidden="true">
+  <aside class="panel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="panelHead">
+      <h2 id="settingsTitle">Réglages</h2>
+      <button class="close" id="closeSettings" aria-label="Fermer">×</button>
+    </div>
+    <div class="settingsGrid">
+      <section class="settingsGroup languageSettingsGroup">
+        <h3 id="languageSettingsHeading">Langue / Language</h3>
+        <div class="languageSwitchRow">
+          <span id="languageSettingsText">Interface en français</span>
+          <button class="btn languageToggleBtn" id="languageToggleBtn" type="button" title="Switch to English" aria-label="Switch to English">fr-en</button>
+        </div>
+      </section>
+      <section class="settingsGroup">
+        <h3>Projet / sauvegarde</h3>
+        <div class="field settingsProjectField">
+          <label for="projectNameSettings">Titre du projet</label>
+          <input id="projectNameSettings" type="text" placeholder="Titre du projet…" autocomplete="off">
+        </div>
+        <div class="panelActions settingsFileActions">
+          <label class="btn" for="importZipFile">Importer ZIP</label>
+          <button class="btn primary" id="settingsSaveBtn" type="button">Sauvegarder ZIP</button>
+        </div>
+        <label class="checkOption">
+          <input id="saveEditOnClose" type="checkbox">
+          <span>Enregistrer les changements à la fermeture d’une fiche</span>
+        </label>
+      </section>
+      <section class="settingsGroup">
+        <h3>Lecture</h3>
+        <div class="field">
+          <label for="slideshowDelay">Temps par image</label>
+          <input id="slideshowDelay" type="number" min="1" max="20" step="0.5" inputmode="decimal">
+        </div>
+      </section>
+      <section class="settingsGroup">
+        <h3>PDF / impression</h3>
+        <div class="field">
+          <label for="pdfScope">Portée</label>
+          <select id="pdfScope">
+            <option value="current">Board affiché / intercalaire actif</option>
+            <option value="all">Classeur complet</option>
+          </select>
+        </div>
+        <div class="panelActions">
+          <button class="btn" id="printPdfBtn" type="button">Exporter PDF</button>
+        </div>
+        <p class="imageHint">Le PDF exporte les boards. Le navigateur ouvre l’impression : choisir “Enregistrer en PDF”.</p>
+      </section>
+    </div>
+  </aside>
+</div>
+<!-- Informations et manuel bilingue / Bilingual information and manual -->
+<div class="drawer" id="infoDrawer" aria-hidden="true">
+  <aside class="panel" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+    <div class="panelHead">
+      <h2 id="infoTitle">Infos & manuel</h2>
+      <button class="close" id="closeInfo" aria-label="Fermer">×</button>
+    </div>
+    <div id="infoContent"></div>
+  </aside>
+</div>
+
+<!-- Aperçu image, lecture et export du diaporama / Image preview, playback and slideshow export -->
+<div class="drawer zoomDrawer" id="zoomDrawer" aria-hidden="true">
+  <aside class="zoomPanel" role="dialog" aria-modal="true" aria-labelledby="zoomTitle">
+    <div class="zoomHead">
+      <h2 id="zoomTitle">Aperçu</h2>
+      <button class="close" id="closeZoom" aria-label="Fermer">×</button>
+    </div>
+    <div class="zoomBody" id="zoomBody"></div>
+    <div class="zoomNav" aria-label="Navigation image">
+      <button class="zoomNavBtn" id="zoomPrev" type="button" title="Image précédente" aria-label="Image précédente">‹</button>
+      <button class="zoomNavBtn zoomPlayBtn" id="zoomPlay" type="button" title="Lecture" aria-label="Lecture"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13L18.5 12z"></path></svg></button>
+      <button class="zoomNavBtn" id="zoomNext" type="button" title="Image suivante" aria-label="Image suivante">›</button>
+      <button class="zoomNavBtn zoomExportBtn" id="zoomExport" type="button" title="Exporter le diaporama du board actif" aria-label="Exporter le diaporama du board actif"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 8l5-5 5 5"></path><path d="M5 13v7h14v-7"></path></svg></button>
+    </div>
+  </aside>
+</div>
+
+<div class="dropHint" id="dropHint">Déposer les images pour créer des fiches</div>
+<div class="status" id="status"></div>
+
+<script>
+/*
+  FARDE — logique de l’application / application logic
+  Les blocs ci-dessous sont commentés en français et en anglais pour faciliter
+  les adaptations sans modifier le fonctionnement général.
+  The sections below are commented in French and English to make customisation
+  easier without changing the overall behaviour.
+*/
+/* Compatibilité des sauvegardes existantes / Existing-save compatibility */
+const STORAGE_KEY = "classeur_visuel_v2";
+
+/* Intercalaires : identifiants, couleurs et descriptions françaises / Sections: IDs, colours and French descriptions */
+const sections = [
+  {id:"moodboard",title:"Moodboard",color:"#A63D40",desc:"Le moodboard sert à fixer l’ambiance visuelle générale d’un projet : ton, époque, lumière, matières, climat, formes dominantes et premières références."},
+  {id:"references",title:"Références",color:"#8D7A54",desc:"Les références servent à résoudre des problèmes concrets de dessin : anatomie, architecture, objets, costumes, véhicules, végétation, matière ou éclairage."},
+  {id:"ideesvisuelles",title:"Idées visuelles",color:"#B65A3C",desc:"Notes dessinées, petits instants de vie, gags visuels, attitudes, réactions, morceaux de scénario dessinés ou idées de mise en scène."},
+  {id:"personnages",title:"Personnages",color:"#1F3A44",desc:"Le model sheet sert à fixer l’apparence d’un personnage pour qu’il reste cohérent d’une scène à l’autre."},
+  {id:"expressions",title:"Expressions",color:"#C47A2C",desc:"La fiche d’expressions définit le registre émotionnel d’un personnage : joie, colère, fatigue, peur, gêne, ironie, mensonge, surprise."},
+  {id:"poses",title:"Poses",color:"#6A7B4B",desc:"La fiche de poses montre comment un personnage occupe l’espace : posture naturelle, gestes récurrents, énergie corporelle, démarche, attitudes de défense ou d’autorité."},
+  {id:"costumes",title:"Costumes",color:"#7E5A76",desc:"La fiche costume fixe les tenues, variantes, accessoires, chaussures, motifs, couleurs et changements selon les scènes."},
+  {id:"objets",title:"Objets",color:"#5D6F7B",desc:"La fiche objet stabilise les accessoires narratifs : carnet, arme, sac, bijou, doudou, véhicule, meuble, carte, outil ou objet transmis."},
+  {id:"decors",title:"Décors",color:"#4D6D63",desc:"La fiche décor fixe les lieux récurrents : plan, accès, mobilier, zones utiles, échelle, lumière, objets fixes et vues principales."},
+  {id:"couleurs",title:"Couleurs / valeurs",color:"#9B5B46",desc:"La fiche couleurs / valeurs fixe les palettes, contrastes, dominantes lumineuses et rapports de valeurs selon les scènes ou séquences."},
+  {id:"styleguide",title:"Style guide",color:"#455061",desc:"Le style guide rassemble les règles graphiques du projet : trait, niveau de détail, ombres, textures, bulles, lettrage, cadrage et interdits visuels."},
+  {id:"continuite",title:"Continuité",color:"#6B4D3D",desc:"La continuité suit l’évolution visuelle dans le temps : vêtements abîmés, blessures, météo, objets perdus, barbe, décor détruit ou changement émotionnel visible."}
+];
+
+/* Traductions anglaises des intercalaires / English section translations */
+const sectionTranslations = {
+  moodboard:{enTitle:"Moodboard",enDesc:"The moodboard establishes the project’s overall visual atmosphere: tone, period, light, materials, climate, dominant shapes and initial references."},
+  references:{enTitle:"References",enDesc:"References help solve concrete drawing problems: anatomy, architecture, objects, costumes, vehicles, vegetation, materials or lighting."},
+  ideesvisuelles:{enTitle:"Visual ideas",enDesc:"Drawn notes, small moments of life, visual gags, attitudes, reactions, drawn fragments of script or staging ideas."},
+  personnages:{enTitle:"Characters",enDesc:"The model sheet fixes a character’s appearance so it remains consistent from one scene to another."},
+  expressions:{enTitle:"Expressions",enDesc:"The expression sheet defines a character’s emotional range: joy, anger, fatigue, fear, embarrassment, irony, lying and surprise."},
+  poses:{enTitle:"Poses",enDesc:"The pose sheet shows how a character occupies space: natural posture, recurring gestures, physical energy, gait, defensive attitudes or authority."},
+  costumes:{enTitle:"Costumes",enDesc:"The costume sheet fixes outfits, variants, accessories, shoes, patterns, colours and scene-by-scene changes."},
+  objets:{enTitle:"Objects",enDesc:"The object sheet stabilises narrative props: notebook, weapon, bag, jewellery, toy, vehicle, furniture, map, tool or inherited object."},
+  decors:{enTitle:"Locations",enDesc:"The location sheet fixes recurring places: layout, access, furniture, useful zones, scale, light, fixed objects and main views."},
+  couleurs:{enTitle:"Colours / values",enDesc:"The colours and values sheet fixes palettes, contrasts, lighting dominance and value relationships for scenes or sequences."},
+  styleguide:{enTitle:"Style guide",enDesc:"The style guide gathers the project’s graphic rules: line, level of detail, shadows, textures, speech balloons, lettering, framing and visual prohibitions."},
+  continuite:{enTitle:"Continuity",enDesc:"Continuity tracks visual changes over time: damaged clothes, injuries, weather, lost objects, beard growth, destroyed locations or visible emotional change."}
+};
+sections.forEach(s=>{s.frTitle=s.title;s.frDesc=s.desc;const t=sectionTranslations[s.id];s.enTitle=t?.enTitle||s.title;s.enDesc=t?.enDesc||s.desc;});
+
+/* Gestion de la langue de l’interface / Interface language management */
+function isEnglish(){return data?.language==="en";}
+function tr(fr,en){return isEnglish()?en:fr;}
+function setSectionLanguage(){sections.forEach(s=>{s.title=isEnglish()?s.enTitle:s.frTitle;s.desc=isEnglish()?s.enDesc:s.frDesc;});}
+function setText(selector,text){const el=document.querySelector(selector);if(el)el.textContent=text;}
+function setAttr(selector,name,value){const el=document.querySelector(selector);if(el)el.setAttribute(name,value);}
+function applyLanguage(){
+  setSectionLanguage();
+  document.documentElement.lang=isEnglish()?"en":"fr";
+  setText(".kicker",tr("Bible graphique","Visual bible"));
+  setAttr("#boardSlideshowBtn","title",tr("Lancer le diaporama du board","Start board slideshow"));
+  setAttr("#boardSlideshowBtn","aria-label",tr("Lancer le diaporama du board","Start board slideshow"));
+  setAttr("#infoBtn","title",tr("Infos","Info")); setAttr("#infoBtn","aria-label",tr("Infos","Info"));
+  setAttr("#settingsBtn","title",tr("Réglages","Settings")); setAttr("#settingsBtn","aria-label",tr("Réglages","Settings"));
+  setAttr("#undoBtn","title",tr("Annuler","Undo")); setAttr("#undoBtn","aria-label",tr("Annuler","Undo"));
+  setAttr("#redoBtn","title",tr("Rétablir","Redo")); setAttr("#redoBtn","aria-label",tr("Rétablir","Redo"));
+  setText(".topImportBtn",tr("Importer","Import")); setText("#saveBtn",tr("Sauvegarder","Save"));
+  const pn=document.querySelector("#projectName"); if(pn)pn.placeholder=tr("Titre du projet…","Project title…");
+  const ps=document.querySelector("#projectNameSettings"); if(ps)ps.placeholder=tr("Titre du projet…","Project title…");
+  const search=document.querySelector("#searchInput"); if(search)search.placeholder=tr("Rechercher titre, note, tags…","Search title, note, tags…");
+  setText("#favoriteFilterBtn .btnText",tr("Favoris","Favourites"));
+  setText("#linkedRefsBtn .btnText",tr("Réfs liées","Linked refs"));
+  setText("#quickSortBtn .btnText",tr("Tri rapide","Quick sort"));
+  setText("#batchImagesBtn",tr("+ images","+ images")); setText("#addBtn",tr("+ fiche","+ card"));
+  setAttr("#grid","aria-label",tr("Fiches visuelles","Visual cards"));
+  setText("#editTitle",tr("Fiche visuelle","Visual card"));
+  const labels=[
+    ["label[for='entrySection']","Section","Section"],[".referenceLinksTitle","Lier cette référence à","Link this reference to"],
+    ["label[for='entryTitle']","Titre","Title"],["label[for='entryImage']","Image","Image"],
+    ["label[for='entryShort']","Texte court optionnel","Optional short text"],["label[for='entryTags']","Tags","Tags"]
+  ]; labels.forEach(x=>setText(x[0],tr(x[1],x[2])));
+  const title=document.querySelector("#entryTitle");if(title)title.placeholder=tr("Ex. Marin — face, Cabane principale, Palette nuit…","E.g. Marin — front, Main cabin, Night palette…");
+  const short=document.querySelector("#entryShort");if(short)short.placeholder=tr("Ce que je garde, détail à retenir, consigne de dessin…","What to keep, useful detail, drawing instruction…");
+  setText("#chooseImageBtn",tr("Choisir une image","Choose an image")); setText("#removeImageBtn",tr("Retirer l’image","Remove image"));
+  const saveEntry=document.querySelector("#entryForm .panelActions .primary");if(saveEntry)saveEntry.textContent=tr("Enregistrer","Save");
+  setText("#duplicateBtn",tr("Dupliquer","Duplicate"));setText("#deleteBtn",tr("Supprimer","Delete"));
+  const checks=document.querySelectorAll("#entryForm .checkOption span");
+  if(checks[0])checks[0].innerHTML=tr("Afficher le texte court sur la fiche visuelle<small>À cocher seulement si la grille doit montrer une indication. Sinon la fiche reste image seule.</small>","Show the short text on the visual card<small>Enable only when the grid should display a note. Otherwise the card remains image-only.</small>");
+  if(checks[1])checks[1].innerHTML=tr("Référence principale<small>Ajoute un repère rouge discret sur la fiche.</small>","Main reference<small>Adds a discreet red marker to the card.</small>");
+  setText("#settingsTitle",tr("Réglages","Settings")); setText("#languageSettingsHeading",tr("Langue / Language","Language / Langue"));
+  setText("#languageSettingsText",tr("Interface en français","Interface in English"));
+  const langBtn=document.querySelector("#languageToggleBtn");if(langBtn){langBtn.textContent=isEnglish()?"en-fr":"fr-en";langBtn.title=tr("Passer en anglais","Switch to French");langBtn.setAttribute("aria-label",langBtn.title);}
+  const groups=document.querySelectorAll("#settingsDrawer .settingsGroup h3");
+  if(groups[1])groups[1].textContent=tr("Projet / sauvegarde","Project / backup");if(groups[2])groups[2].textContent=tr("Lecture","Playback");if(groups[3])groups[3].textContent=tr("PDF / impression","PDF / print");
+  setText("label[for='projectNameSettings']",tr("Titre du projet","Project title"));
+  const importZip=document.querySelector("label[for='importZipFile'].btn");if(importZip)importZip.textContent=tr("Importer ZIP","Import ZIP");
+  setText("#settingsSaveBtn",tr("Sauvegarder ZIP","Save ZIP"));
+  const settingCheck=document.querySelector("#settingsDrawer .checkOption span");if(settingCheck)settingCheck.textContent=tr("Enregistrer les changements à la fermeture d’une fiche","Save changes when closing a card");
+  setText("label[for='slideshowDelay']",tr("Temps par image","Time per image"));setText("label[for='pdfScope']",tr("Portée","Scope"));
+  const opts=document.querySelectorAll("#pdfScope option");if(opts[0])opts[0].textContent=tr("Board affiché / intercalaire actif","Displayed board / active section");if(opts[1])opts[1].textContent=tr("Classeur complet","Complete binder");
+  setText("#printPdfBtn",tr("Exporter PDF","Export PDF"));
+  const hint=document.querySelector("#settingsDrawer .settingsGroup:last-child .imageHint");if(hint)hint.textContent=tr("Le PDF exporte les boards. Le navigateur ouvre l’impression : choisir “Enregistrer en PDF”.","The PDF exports the boards. The browser opens the print dialog: choose “Save as PDF”.");
+  setText("#infoTitle",tr("Infos & manuel","Info & manual"));setText("#zoomTitle",tr("Aperçu","Preview"));
+  setAttr("#zoomPrev","title",tr("Image précédente","Previous image"));setAttr("#zoomNext","title",tr("Image suivante","Next image"));
+  setAttr("#zoomPlay","title",tr("Lecture","Play"));setAttr("#zoomExport","title",tr("Exporter le diaporama du board actif","Export active board slideshow"));
+  setText("#dropHint",tr("Déposer les images pour créer des fiches","Drop images to create cards"));
+  initSelects(true); render();
+}
+
+/* Structure des données enregistrées / Saved-data structure */
+const defaultData = {language:"fr",projectName:"",activeSection:"moodboard",showAll:false,favoriteOnly:false,showLinkedReferences:false,quickSortMode:false,saveEditOnClose:true,slideshowDelay:3,slideshowTransition:"fade",entries:[]};
+let data = load();
+let currentEditId = null;
+let undoStack = [];
+let redoStack = [];
+const HISTORY_LIMIT = 40;
+
+const $ = s => document.querySelector(s);
+const grid = $("#grid");
+const sectionFilter = $("#sectionFilter");
+const entrySection = $("#entrySection");
+
+/* Chargement et normalisation du projet / Project loading and normalisation */
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? normalize(JSON.parse(raw)) : structuredClone(defaultData);
+  }catch(e){ return structuredClone(defaultData); }
+}
+function normalize(obj){
+  return {language:obj.language==="en"?"en":"fr",projectName:obj.projectName||"",activeSection:obj.activeSection||"moodboard",showAll:!!obj.showAll,favoriteOnly:!!obj.favoriteOnly,showLinkedReferences:!!obj.showLinkedReferences,quickSortMode:!!obj.quickSortMode,saveEditOnClose:obj.saveEditOnClose!==false,slideshowDelay: Number(obj.slideshowDelay)||3,slideshowTransition: obj.slideshowTransition||"fade",entries:Array.isArray(obj.entries)?obj.entries.map(e=>({image:"",imageId:"",imageStatus:"",originalFileName:"",linkedSections:[],...e,linkedSections:Array.isArray(e.linkedSections)?e.linkedSections:[]})):[]};
+}
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(data));}
+function sectionById(id){return sections.find(s=>s.id===id)||sections[0];}
+function uid(){return crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random());}
+function esc(str){return String(str??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
+function status(msg){const el=$("#status");el.textContent=msg;el.classList.add("show");clearTimeout(status.t);status.t=setTimeout(()=>el.classList.remove("show"),1600);}
+
+function dataSnapshot(){ return structuredClone(data); }
+function pushHistory(label=""){
+  undoStack.push({label, data:dataSnapshot()});
+  if(undoStack.length > HISTORY_LIMIT) undoStack.shift();
+  redoStack = [];
+  updateHistoryButtons();
+}
+function restoreHistory(snapshot){
+  data = normalize(structuredClone(snapshot.data));
+  save();
+  render();
+  updateHistoryButtons();
+}
+function updateHistoryButtons(){
+  const u=$("#undoBtn"), r=$("#redoBtn");
+  if(u) u.disabled = !undoStack.length;
+  if(r) r.disabled = !redoStack.length;
+}
+function undo(){
+  if(!undoStack.length) return;
+  redoStack.push({label:"rétablir", data:dataSnapshot()});
+  const snapshot = undoStack.pop();
+  restoreHistory(snapshot);
+  status("Annulé");
+}
+function redo(){
+  if(!redoStack.length) return;
+  undoStack.push({label:"annuler", data:dataSnapshot()});
+  const snapshot = redoStack.pop();
+  restoreHistory(snapshot);
+  status("Rétabli");
+}
+
+function hexToRgba(hex,alpha=.6){
+  const h = String(hex||"#1F3A44").replace("#","").trim();
+  const full = h.length===3 ? h.split("").map(c=>c+c).join("") : h.slice(0,6);
+  const n = parseInt(full,16);
+  if(!Number.isFinite(n)) return `rgba(31,58,68,${alpha})`;
+  return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${alpha})`;
+}
+
+
+function openImageDB(){
+  return new Promise((resolve,reject)=>{
+    const req = indexedDB.open("classeur_visuel_images",1);
+    req.onupgradeneeded = () => req.result.createObjectStore("images");
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function putLocalImage(id,blob){
+  const db = await openImageDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction("images","readwrite");
+    tx.objectStore("images").put(blob,id);
+    tx.oncomplete = () => {db.close(); resolve();};
+    tx.onerror = () => {db.close(); reject(tx.error);};
+  });
+}
+async function getLocalImage(id){
+  if(!id) return null;
+  const db = await openImageDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction("images","readonly");
+    const req = tx.objectStore("images").get(id);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+    tx.oncomplete = () => db.close();
+  });
+}
+async function deleteLocalImage(id){
+  if(!id) return;
+  const db = await openImageDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction("images","readwrite");
+    tx.objectStore("images").delete(id);
+    tx.oncomplete = () => {db.close(); resolve();};
+    tx.onerror = () => {db.close(); reject(tx.error);};
+  });
+}
+async function resizeImageFile(file,maxSize=1200,quality=.76){
+  const bitmap = await createImageBitmap(file);
+  let {width,height} = bitmap;
+  const ratio = Math.min(1,maxSize/Math.max(width,height));
+  width = Math.round(width*ratio); height = Math.round(height*ratio);
+  const canvas = document.createElement("canvas");
+  canvas.width = width; canvas.height = height;
+  const ctx = canvas.getContext("2d",{alpha:false});
+  ctx.fillStyle = "#f7f2e8";
+  ctx.fillRect(0,0,width,height);
+  ctx.drawImage(bitmap,0,0,width,height);
+  bitmap.close?.();
+  return new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",quality));
+}
+async function resizeImageBlob(blob,maxSize=1000,quality=.68){
+  const bitmap = await createImageBitmap(blob);
+  let {width,height} = bitmap;
+  const ratio = Math.min(1,maxSize/Math.max(width,height));
+  width = Math.round(width*ratio); height = Math.round(height*ratio);
+  const canvas = document.createElement("canvas");
+  canvas.width = width; canvas.height = height;
+  const ctx = canvas.getContext("2d",{alpha:false});
+  ctx.fillStyle = "#f7f2e8";
+  ctx.fillRect(0,0,width,height);
+  ctx.drawImage(bitmap,0,0,width,height);
+  bitmap.close?.();
+  return new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",quality));
+}
+function localImageUrl(blob){ return URL.createObjectURL(blob); }
+async function hydrateLocalImages(){
+  const nodes = Array.from(document.querySelectorAll("[data-local-image]"));
+  for(const node of nodes){
+    try{
+      const blob = await getLocalImage(node.dataset.localImage);
+      if(!blob) continue;
+      const url = localImageUrl(blob);
+      node.innerHTML = `<img src="${url}" alt="">`;
+      const img = node.querySelector("img");
+      img.onload = () => URL.revokeObjectURL(url);
+    }catch(e){}
+  }
+}
+async function setPreviewFromLocal(id){
+  const box = $("#previewBox");
+  try{
+    const blob = await getLocalImage(id);
+    if(!blob){ updatePreview(); return; }
+    const url = localImageUrl(blob);
+    box.innerHTML = `<img src="${url}" alt="">`;
+    box.querySelector("img").onload = () => URL.revokeObjectURL(url);
+    updateImageStatusBox();
+  }catch(e){ updatePreview(); }
+}
+
+function initSelects(preserve=false){
+  sectionFilter.innerHTML = `<option value="__all">${tr("Toutes les sections","All sections")}</option>` + sections.map(s=>`<option value="${s.id}">${esc(s.title)}</option>`).join("");
+  entrySection.innerHTML = sections.map(s=>`<option value="${s.id}">${esc(s.title)}</option>`).join("");
+  const menu = $("#sectionPickerMenu");
+  if(menu) menu.innerHTML = `<button class="sectionPickerOption" type="button" role="option" data-section="__all"><span class="sectionOptionDot" style="background:#1F3A44"></span><span>${tr("Toutes les sections","All sections")}</span></button>` + sections.map(s=>`<button class="sectionPickerOption" type="button" role="option" data-section="${esc(s.id)}"><span class="sectionOptionDot" style="background:${esc(s.color)}"></span><span>${esc(s.title)}</span></button>`).join("");
+  if(menu) menu.querySelectorAll(".sectionPickerOption").forEach(btn=>btn.addEventListener("click",()=>{data.showAll=btn.dataset.section==="__all";if(!data.showAll)data.activeSection=btn.dataset.section;save();closeSectionPicker();render();}));
+  if(!preserve) render();
+}
+function buildSectionPicker(){
+  const menu = $("#sectionPickerMenu");
+  if(!menu) return;
+  const all = `<button class="sectionPickerOption" type="button" data-section="__all" role="option" style="--sectionColor:#1F3A44"><span class="dot"></span><span>Toutes les sections</span></button>`;
+  menu.innerHTML = all + sections.map(s=>`<button class="sectionPickerOption" type="button" data-section="${s.id}" role="option" style="--sectionColor:${s.color}"><span class="dot"></span><span>${s.title}</span></button>`).join("");
+  menu.querySelectorAll(".sectionPickerOption").forEach(btn=>btn.addEventListener("click",()=>setSectionFromPicker(btn.dataset.section)));
+}
+function setSectionFromPicker(value){
+  data.showAll = value === "__all";
+  if(!data.showAll) data.activeSection = value;
+  save();
+  closeSectionPicker();
+  render();
+}
+function openSectionPicker(){
+  const menu = $("#sectionPickerMenu"), btn = $("#sectionPickerBtn");
+  if(!menu || !btn) return;
+  menu.classList.remove("hidden");
+  btn.setAttribute("aria-expanded","true");
+}
+function closeSectionPicker(){
+  const menu = $("#sectionPickerMenu"), btn = $("#sectionPickerBtn");
+  if(!menu || !btn) return;
+  menu.classList.add("hidden");
+  btn.setAttribute("aria-expanded","false");
+}
+function toggleSectionPicker(){
+  const menu = $("#sectionPickerMenu");
+  if(!menu) return;
+  menu.classList.contains("hidden") ? openSectionPicker() : closeSectionPicker();
+}
+function syncSectionPicker(){
+  const current = data.showAll ? {id:"__all",title:tr("Toutes les sections","All sections"),color:"#1F3A44"} : sectionById(data.activeSection);
+  const picker = $("#sectionPickerBtn"), dot = $(".sectionPickerDot"), label = $("#sectionPickerLabel"), menu = $("#sectionPickerMenu");
+  if(picker){
+    picker.style.setProperty("--pickerColor", current.color);
+    picker.style.setProperty("--pickerColorSoft", hexToRgba(current.color,.6));
+  }
+  if(dot) dot.style.background = current.color;
+  if(label) label.textContent = current.title;
+  if(menu) menu.querySelectorAll(".sectionPickerOption").forEach(o=>o.classList.toggle("active",o.dataset.section===current.id));
+}
+
+function currentSearchQuery(){ return ($("#searchInput")?.value || "").trim().toLowerCase(); }
+function isLinkedReferenceForActiveBoard(e){
+  return !!(data.showLinkedReferences && !data.showAll && !currentSearchQuery() && data.activeSection !== "references" && e.section === "references" && Array.isArray(e.linkedSections) && e.linkedSections.includes(data.activeSection));
+}
+function currentEntries(){
+  const q = currentSearchQuery();
+  return data.entries.filter(e=>{
+    if(data.favoriteOnly && !e.fav) return false;
+    const linkedTitles = Array.isArray(e.linkedSections) ? e.linkedSections.map(id=>sectionById(id).title).join(" ") : "";
+    const hay = `${e.title||""} ${e.short||""} ${e.tags||""} ${sectionById(e.section).title} ${linkedTitles}`.toLowerCase();
+    if(q) return hay.includes(q);
+    return data.showAll || e.section===data.activeSection || isLinkedReferenceForActiveBoard(e);
+  }).map(e=>({...e,_linkedRef:isLinkedReferenceForActiveBoard(e)}));
+}
+
+/* Affichage des intercalaires et des fiches / Section and card rendering */
+function render(){
+  document.body.classList.toggle("quick-sort-mode", !!data.quickSortMode);
+  const favBtn = $("#favoriteFilterBtn"); if(favBtn) favBtn.classList.toggle("active", !!data.favoriteOnly);
+  const linkedBtn = $("#linkedRefsBtn");
+  if(linkedBtn){
+    const canShowLinked = !data.showAll && !currentSearchQuery() && data.activeSection !== "references";
+    linkedBtn.disabled = !canShowLinked;
+    linkedBtn.classList.toggle("active", !!data.showLinkedReferences && canShowLinked);
+    linkedBtn.title = canShowLinked ? tr("Afficher les références liées à ce board","Show references linked to this board") : tr("Disponible dans un board autre que Références","Available in boards other than References");
+  }
+  const qsBtn = $("#quickSortBtn"); if(qsBtn) qsBtn.classList.toggle("active", !!data.quickSortMode);
+  const projectInput = $("#projectName");
+  if(projectInput && document.activeElement !== projectInput) projectInput.value = data.projectName || "";
+  const projectSettingsInput = $("#projectNameSettings");
+  if(projectSettingsInput && document.activeElement !== projectSettingsInput) projectSettingsInput.value = data.projectName || "";
+  sectionFilter.value = data.showAll ? "__all" : data.activeSection;
+  const s = sectionById(data.activeSection);
+  sectionFilter.style.borderColor = data.showAll ? "rgba(31,58,68,.28)" : s.color;
+  sectionFilter.style.boxShadow = data.showAll ? "none" : `inset 7px 0 0 ${s.color}`;
+  sectionFilter.style.paddingLeft = data.showAll ? "12px" : "18px";
+  syncSectionPicker();
+  document.documentElement.style.setProperty("--activeColor",s.color);
+  const q = currentSearchQuery();
+  const summary = $(".summary");
+  if(summary) summary.classList.toggle("searchMode", !!q);
+  $(".sectionDot").style.background = q ? "var(--rouge)" : (data.showAll ? "var(--bleu)" : s.color);
+  $("#sectionLabel").textContent = q ? tr("Recherche","Search") : "";
+  const entries = currentEntries();
+  const boardPlayBtn = $("#boardSlideshowBtn");
+  if(boardPlayBtn) boardPlayBtn.disabled = !entries.length;
+  $("#countLabel").textContent = isEnglish() ? `${entries.length} card${entries.length===1?"":"s"}` : `${entries.length} fiche${entries.length>1?"s":""}`;
+  $("#printTitle").textContent = `${data.projectName ? data.projectName + " — " : ""}Farde`;
+  if(!entries.length){
+    grid.innerHTML = `<div class="empty">${currentSearchQuery() ? tr("Aucun résultat dans les titres, notes ou tags.","No results in titles, notes or tags.") : tr("Aucune fiche visuelle. Ajouter une image ou changer de section.","No visual cards. Add an image or change section.")}</div>`;
+    return;
+  }
+  grid.innerHTML = entries.map(e=>{
+    const sec = sectionById(e.section);
+    const fallback = `<div class="fallback"><b>${esc(initials(e.title||sec.title))}</b><small>${esc(sec.title)}</small></div>`;
+    const img = e.imageId
+      ? `<div class="localImageSlot" data-local-image="${esc(e.imageId)}">${fallback}</div>`
+      : (e.image ? `<img src="${esc(e.image)}" alt="">` : fallback);
+    const label = e.showText ? `<div class="cardText">${esc(e.short || e.title || sec.title)}</div>` : "";
+    const quickDots = e._linkedRef ? "" : sections.map(s=>`<button class="quickSortDot ${e.section===s.id?'active':''}" type="button" data-quick-section="${esc(s.id)}" data-id="${esc(e.id)}" style="--dotColor:${esc(s.color)}" title="${esc(s.title)}" aria-label="${esc(tr("Classer dans","Move to"))} ${esc(s.title)}"></button>`).join("");
+    const linkedBadge = e._linkedRef ? `<span class="linkedBadge">${tr('Réf. liée','Linked ref')}</span>` : '';
+    const moveControl = e._linkedRef ? '' : `<button class="cardToolBtn moveBtn" type="button" data-move="${esc(e.id)}" title="${tr("Déplacer","Move")}" aria-label="${tr("Déplacer","Move")}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18"></path><path d="M7 8l5-5 5 5"></path><path d="M7 16l5 5 5-5"></path></svg></button>`;
+    return `<article class="card ${data.quickSortMode&&!e._linkedRef?'quick-sort':''} ${e._linkedRef?'linkedRef':''}" style="--catColor:${sec.color}" data-id="${esc(e.id)}" title="${esc(e.title||sec.title)}">
+      ${e.fav?'<span class="favMark"></span>':''}${linkedBadge}
+      <div class="cardImage">${img}${label}</div>
+      <div class="quickSortPanel" aria-label="Tri rapide">${quickDots}</div>
+      <div class="cardControls" aria-label="Actions de la fiche">
+        <button class="cardToolBtn zoomBtn" type="button" data-zoom="${esc(e.id)}" title="${tr("Agrandir","Enlarge")}" aria-label="${tr("Agrandir","Enlarge")}">⌕</button>
+        ${moveControl}
+      </div>
+      <div class="printMeta"><h3>${esc(e.title||sec.title)}</h3>${e.short?`<p>${esc(e.short)}</p>`:""}${e.tags?`<p><strong>${tr("Tags :","Tags:")}</strong> ${esc(e.tags)}</p>`:""}<p><strong>${tr("Intercalaire :","Section:")}</strong> ${esc(sec.title)}</p></div>
+    </article>`;
+  }).join("");
+  bindCards();
+  hydrateLocalImages();
+}
+function initials(text){return String(text).split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join("").toUpperCase()||"CV";}
+
+/* Ouverture et enregistrement d’une fiche / Card opening and saving */
+function openEdit(id){
+  currentEditId = id || null;
+  const e = id ? data.entries.find(x=>x.id===id) : {id:"",section:data.showAll?data.activeSection:data.activeSection,title:"",image:"",imageId:"",short:"",tags:"",showText:false,fav:false,linkedSections:[]};
+  if(!e) return;
+  $("#editTitle").textContent = id ? tr("Modifier la fiche","Edit card") : tr("Nouvelle fiche","New card");
+  $("#entryId").value = e.id || "";
+  entrySection.value = e.section || data.activeSection;
+  $("#entryTitle").value = e.title || "";
+  $("#entryImage").value = e.image || "";
+  $("#entryImageId").value = e.imageId || "";
+  $("#entryImageId").dataset.originalFileName = e.originalFileName || "";
+  $("#entryShort").value = e.short || "";
+  $("#entryTags").value = e.tags || "";
+  $("#entryShowText").checked = !!e.showText;
+  $("#entryFav").checked = !!e.fav;
+  renderReferenceLinks(e.linkedSections || []);
+  updateReferenceLinksVisibility();
+  $("#deleteBtn").disabled = !id;
+  $("#duplicateBtn").disabled = !id;
+  $("#editZoomBtn").disabled = !id || !(e.imageId || e.image);
+  updatePreview();
+  $("#editDrawer").classList.add("open");
+  $("#editDrawer").setAttribute("aria-hidden","false");
+  setTimeout(()=>$("#entryTitle").focus(),50);
+}
+function renderReferenceLinks(selected=[]){
+  const box = $("#referenceLinksGrid");
+  if(!box) return;
+  const set = new Set(Array.isArray(selected)?selected:[]);
+  box.innerHTML = sections.filter(s=>s.id!=="references").map(s=>`<label class="linkCheck"><input type="checkbox" value="${esc(s.id)}" ${set.has(s.id)?"checked":""}><span class="linkCheckDot" style="--linkColor:${esc(s.color)}"></span><span>${esc(s.title)}</span></label>`).join("");
+}
+function updateReferenceLinksVisibility(){
+  const box = $("#referenceLinksBox");
+  if(!box) return;
+  box.classList.toggle("hidden", entrySection.value !== "references");
+}
+function linkedSectionsFromForm(){
+  return Array.from(document.querySelectorAll("#referenceLinksGrid input:checked")).map(i=>i.value);
+}
+function formHasContent(){
+  return ["entryTitle","entryImage","entryImageId","entryShort","entryTags"].some(id=>String($("#"+id).value||"").trim());
+}
+function collectEntryFromForm(){
+  const id = $("#entryId").value || uid();
+  const existing = data.entries.find(e=>e.id===id) || {};
+  const image = $("#entryImage").value.trim();
+  const imageId = $("#entryImageId").value.trim();
+  return {id,section:entrySection.value,title:$("#entryTitle").value.trim(),image,imageId,short:$("#entryShort").value.trim(),tags:$("#entryTags").value.trim(),showText:$("#entryShowText").checked,fav:$("#entryFav").checked,linkedSections:entrySection.value==="references"?linkedSectionsFromForm():[],originalFileName:$("#entryImageId").dataset.originalFileName||existing.originalFileName||"",imageStatus:computeImageStatus({image,imageId})};
+}
+function saveEntryFromForm(){
+  if(!formHasContent()) return false;
+  const entry = collectEntryFromForm();
+  const idx = data.entries.findIndex(e=>e.id===entry.id);
+  const oldEntry = idx>=0 ? JSON.stringify(data.entries[idx]) : "";
+  const newEntry = JSON.stringify(entry);
+  if(oldEntry === newEntry) return false;
+  pushHistory(idx>=0 ? "Modifier fiche" : "Ajouter fiche");
+  if(idx>=0) data.entries[idx]=entry; else data.entries.unshift(entry);
+  /* On conserve toujours la vue d’origine après édition : changer la section d’une fiche ne force pas la navigation. */
+  save();
+  return true;
+}
+function closeEdit(opts={}){
+  if(!opts.skipSave && data.saveEditOnClose && $("#editDrawer").classList.contains("open")){
+    if(saveEntryFromForm()) status("Fiche enregistrée");
+  }
+  $("#editDrawer").classList.remove("open"); $("#editDrawer").setAttribute("aria-hidden","true"); currentEditId=null; render();
+}
+function computeImageStatus(entry){
+  if(entry?.imageId) return "locale";
+  const img = String(entry?.image||"").trim();
+  if(!img) return "manquante";
+  if(/^https?:\/\//i.test(img)) return "url";
+  return "chemin";
+}
+function updateImageStatusBox(entry=null){
+  const box = $("#imageStatusBox"); if(!box) return;
+  const image = entry ? entry.image : $("#entryImage")?.value.trim();
+  const imageId = entry ? entry.imageId : $("#entryImageId")?.value.trim();
+  const original = entry ? entry.originalFileName : (data.entries.find(e=>e.id===$("#entryId")?.value)||{}).originalFileName;
+  const st = computeImageStatus({image,imageId});
+  const labels = {locale:"locale, incluse dans le ZIP",url:"URL externe, non recopiée dans le ZIP",chemin:"chemin relatif, non recopié",manquante:"manquante"};
+  box.innerHTML = `<strong>Image :</strong> ${labels[st]||st}${original?`<br><strong>Fichier d’origine :</strong> ${esc(original)}`:""}`;
+}
+function updatePreview(){
+  const localId = $("#entryImageId").value.trim();
+  if(localId){ setPreviewFromLocal(localId); return; }
+  const src = $("#entryImage").value.trim();
+  const title = $("#entryTitle").value.trim() || sectionById(entrySection.value).title;
+  $("#previewBox").innerHTML = src ? `<img src="${esc(src)}" alt="">` : `<div class="fallback" style="background:${sectionById(entrySection.value).color}"><b>${esc(initials(title))}</b><small>${esc(sectionById(entrySection.value).title)}</small></div>`;
+  updateImageStatusBox();
+}
+
+function submitEntry(ev){
+  ev.preventDefault();
+  if(saveEntryFromForm()){ closeEdit({skipSave:true}); render(); status("Fiche enregistrée"); }
+}
+async function deleteCurrent(){
+  if(!currentEditId) return;
+  const idToDelete = currentEditId;
+  const e = data.entries.find(x=>x.id===idToDelete);
+  if(!e || !confirm(`Supprimer « ${e.title||"cette fiche"} » ?`)) return;
+
+  /* Important : la suppression ne doit pas passer par closeEdit() avec sauvegarde automatique.
+     Sinon, quand l’option “enregistrer à la fermeture” est active, la fiche supprimée
+     est recréée depuis les champs encore présents dans le panneau. */
+  pushHistory("Supprimer fiche");
+  data.entries = data.entries.filter(x=>x.id!==idToDelete);
+  /* L’image locale est laissée dans IndexedDB : cela permet à Annuler de restaurer la fiche.
+     Les images orphelines ne sont pas exportées dans le ZIP si aucune fiche ne les utilise. */
+
+  save();
+  closeEdit({skipSave:true});
+  render();
+  status("Fiche supprimée");
+}
+function duplicateCurrent(){
+  if(!currentEditId) return;
+  const e = data.entries.find(x=>x.id===currentEditId);
+  if(!e) return;
+  const copy = structuredClone(e);
+  copy.id = uid(); copy.title = (copy.title||"Fiche") + " — copie";
+  pushHistory("Dupliquer fiche");
+  data.entries.unshift(copy); save(); closeEdit(); render(); status("Fiche dupliquée");
+}
+
+
+async function chooseLocalImage(ev){
+  const file = ev.target.files && ev.target.files[0];
+  if(!file) return;
+  if(!file.type.startsWith("image/")){ alert("Fichier image attendu."); return; }
+  try{
+    status("Image en cours d’import…");
+    const blob = await resizeImageFile(file);
+    const imageId = "img_" + uid();
+    await putLocalImage(imageId,blob);
+    /* On ne supprime pas l’ancienne image locale ici : annuler/rétablir peut en avoir besoin. */
+    $("#entryImageId").value = imageId;
+    $("#entryImageId").dataset.originalFileName = file.name || "";
+    $("#entryImage").value = "";
+    await setPreviewFromLocal(imageId);
+    status("Image importée localement");
+  }catch(e){
+    console.error(e);
+    alert("Import image impossible dans ce navigateur.");
+  }
+  ev.target.value = "";
+}
+
+async function createCardsFromImageFiles(files,source="import"){
+  const imageFiles = Array.from(files || []).filter(file=>file && file.type && file.type.startsWith("image/"));
+  if(!imageFiles.length) return 0;
+  const targetSection = data.activeSection || sections[0].id;
+  const keepAllView = !!data.showAll;
+  pushHistory(source === "drop" ? "Déposer images" : "Importer images");
+  let added = 0;
+  status(`${source === "drop" ? "Dépôt" : "Import"} de ${imageFiles.length} image${imageFiles.length>1?"s":""}…`);
+  for(const file of imageFiles){
+    try{
+      const blob = await resizeImageFile(file);
+      const imageId = "img_" + uid();
+      await putLocalImage(imageId,blob);
+      const baseName = (file.name || "Image").replace(/\.[^.]+$/," ").replace(/[_-]+/g," ").trim();
+      data.entries.unshift({
+        id:uid(),
+        section:targetSection,
+        title:baseName || "Image",
+        image:"",
+        imageId,
+        short:"",
+        tags:"",
+        showText:false,
+        fav:false,
+        originalFileName:file.name||"",
+        imageStatus:"locale"
+      });
+      added++;
+    }catch(err){
+      console.error("Import image impossible", file.name, err);
+    }
+  }
+  data.showAll = keepAllView;
+  save();
+  render();
+  status(`${added} fiche${added>1?"s":""} créée${added>1?"s":""}`);
+  return added;
+}
+
+async function importBatchImages(ev){
+  await createCardsFromImageFiles(ev.target.files || [], "import");
+  ev.target.value = "";
+}
+
+async function removeEntryImage(){
+  /* On conserve l’image locale en base pour permettre annuler/rétablir si la fiche n’est pas encore sauvegardée. */
+  $("#entryImageId").value = "";
+  $("#entryImage").value = "";
+  updatePreview();
+  status("Image retirée");
+}
+
+let currentZoomUrl = null;
+let currentZoomId = null;
+let zoomPlayTimer = null;
+let zoomMoveDirection = 0;
+const PLAY_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13L18.5 12z"></path></svg>`;
+const PAUSE_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="5" width="4" height="14" rx="1"></rect><rect x="13" y="5" width="4" height="14" rx="1"></rect></svg>`;
+function setZoomPlayButton(){
+  const btn = $("#zoomPlay");
+  if(!btn) return;
+  const playing = !!zoomPlayTimer;
+  btn.innerHTML = playing ? PAUSE_ICON : PLAY_ICON;
+  btn.classList.toggle("active", playing);
+  btn.title = playing ? "Pause" : "Lecture";
+  btn.setAttribute("aria-label", playing ? "Pause" : "Lecture");
+}
+function stopZoomPlay(){
+  if(zoomPlayTimer){ clearInterval(zoomPlayTimer); zoomPlayTimer = null; setZoomPlayButton(); }
+}
+function toggleZoomPlay(){
+  if(zoomPlayTimer){ stopZoomPlay(); return; }
+  const seq = zoomSequence();
+  if(seq.length < 2){ status("Pas d’image suivante"); return; }
+  const delay = Math.max(1, Math.min(20, Number(data.slideshowDelay)||3)) * 1000;
+  zoomPlayTimer = setInterval(()=>shiftZoom(1), delay);
+  setZoomPlayButton();
+}
+function zoomSequence(){ return currentEntries(); }
+async function startBoardSlideshow(){
+  const seq = currentEntries();
+  if(!seq.length){ status("Aucune image dans ce board"); return; }
+  stopZoomPlay();
+  zoomMoveDirection = 0;
+  await openZoom(seq[0].id);
+  if(seq.length > 1) toggleZoomPlay();
+}
+function shiftZoom(delta){
+  if(!currentZoomId) return;
+  const seq = zoomSequence();
+  if(seq.length < 2) return;
+  const idx = seq.findIndex(e=>e.id===currentZoomId);
+  if(idx < 0) return;
+  const next = seq[(idx + delta + seq.length) % seq.length];
+  if(next){ zoomMoveDirection = delta; openZoom(next.id); }
+}
+function setZoomBodyContent(html){
+  const body = $("#zoomBody");
+  body.classList.remove("zoomFade","zoomSlideNext","zoomSlidePrev");
+  body.innerHTML = html;
+  body.classList.add("zoomFade");
+}
+
+/* Aperçu image et diaporama / Image preview and slideshow */
+async function openZoom(id){
+  const e = data.entries.find(x=>x.id===id);
+  if(!e) return;
+  currentZoomId = id;
+  const sec = sectionById(e.section);
+  const title = e.title || sec.title;
+  const seq = zoomSequence();
+  const idx = seq.findIndex(x=>x.id===id);
+  $("#zoomTitle").textContent = idx >= 0 && seq.length > 1 ? `${title} — ${idx+1}/${seq.length}` : title;
+  const body = $("#zoomBody");
+  if(currentZoomUrl){ URL.revokeObjectURL(currentZoomUrl); currentZoomUrl = null; }
+  setZoomBodyContent(`<div class="fallback" style="background:${sec.color}"><b>${esc(initials(title))}</b><small>${esc(sec.title)}</small></div>`);
+  try{
+    if(e.imageId){
+      const blob = await getLocalImage(e.imageId);
+      if(blob){
+        currentZoomUrl = localImageUrl(blob);
+        setZoomBodyContent(`<img src="${currentZoomUrl}" alt="">`);
+      }
+    }else if(e.image){
+      setZoomBodyContent(`<img src="${esc(e.image)}" alt="">`);
+    }
+  }catch(err){}
+  $("#zoomDrawer").classList.add("open");
+  $("#zoomDrawer").setAttribute("aria-hidden","false");
+  setZoomPlayButton();
+}
+function closeZoom(){
+  stopZoomPlay();
+  $("#zoomDrawer").classList.remove("open");
+  $("#zoomDrawer").setAttribute("aria-hidden","true");
+  if(currentZoomUrl){ URL.revokeObjectURL(currentZoomUrl); currentZoomUrl = null; }
+  $("#zoomBody").classList.remove("zoomFade","zoomSlideNext","zoomSlidePrev");
+  $("#zoomBody").innerHTML = "";
+  currentZoomId = null;
+  zoomMoveDirection = 0;
+}
+
+/* Construction du manuel bilingue / Bilingual manual builder */
+function openInfo(){
+  const boards = sections.map(s=>`<section class="infoSection" style="--infoColor:${esc(s.color)}"><h3>${esc(s.title)}</h3><p>${esc(s.desc)}</p></section>`).join("");
+  const manualFr = `
+    <div class="infoIntro"><strong>Farde</strong> permet de rassembler, classer, rechercher et présenter les images de référence d’un projet. Le travail courant est conservé dans le navigateur et peut être archivé ou transféré grâce à la sauvegarde ZIP complète.</div>
+    <h3 class="infoManualTitle">Manuel complet</h3><div class="infoManual">
+    <details class="manualSection" open><summary>1. Prise en main</summary><div class="manualBody"><ol><li>Donner un titre au projet.</li><li>Choisir un intercalaire.</li><li>Ajouter une fiche ou importer plusieurs images.</li><li>Classer, annoter et marquer les références importantes.</li><li>Sauvegarder régulièrement au format ZIP.</li></ol></div></details>
+    <details class="manualSection"><summary>2. Intercalaires et boards</summary><div class="manualBody"><p>Le menu des sections affiche un board ou l’ensemble du classeur. Chaque intercalaire possède une couleur et une fonction dédiée.</p></div></details>
+    <details class="manualSection"><summary>3. Créer et modifier une fiche</summary><div class="manualBody"><p>Cliquer sur <strong>+ fiche</strong>, choisir une section, ajouter une image, un titre, une note et des tags. Une fiche peut être dupliquée, déplacée ou supprimée.</p></div></details>
+    <details class="manualSection"><summary>4. Importer plusieurs images</summary><div class="manualBody"><p><strong>+ images</strong> crée automatiquement une fiche par fichier dans le board actif. Le glisser-déposer est également disponible.</p></div></details>
+    <details class="manualSection"><summary>5. Références liées</summary><div class="manualBody"><p>Une fiche de <strong>Références</strong> peut être liée à plusieurs boards. Le bouton <strong>Réfs liées</strong> les affiche ou les masque dans le board concerné.</p></div></details>
+    <details class="manualSection"><summary>6. Recherche, favoris et tri</summary><div class="manualBody"><p>La recherche porte sur les titres, notes et tags. Favoris limite l’affichage aux références principales. Tri rapide permet de déplacer les fiches entre les intercalaires.</p></div></details>
+    <details class="manualSection"><summary>7. Focus et diaporama</summary><div class="manualBody"><p>La loupe ouvre l’image en grand. Le bouton rond Lecture lance le diaporama du board actif. Les flèches, le clavier et le balayage tactile permettent de naviguer.</p></div></details>
+    <details class="manualSection"><summary>8. Exporter un diaporama</summary><div class="manualBody"><p>Le bouton d’export de la fenêtre focus crée un HTML autonome du board actif, avec les images et la durée définie dans les réglages.</p></div></details>
+    <details class="manualSection"><summary>9. Sauvegarde ZIP</summary><div class="manualBody"><p>Le ZIP contient les données du projet, les fiches, les tags, les liens entre boards, les réglages et les images locales. C’est le format recommandé pour l’archivage et le transfert.</p></div></details>
+    <details class="manualSection"><summary>10. PDF et raccourcis</summary><div class="manualBody"><p>L’export PDF se trouve dans Réglages. Raccourcis : Ctrl/Cmd + S pour sauvegarder, Ctrl/Cmd + Z pour annuler, Échap pour fermer, flèches gauche/droite en focus.</p></div></details>
+    <details class="manualSection" open><summary>11. Description des intercalaires</summary><div class="manualBody">${boards}</div></details></div>
+    <div class="infoIntro infoNameNote">En Belgique, une <span class="fardeWord">FARDE</span> est une chemise cartonnée, un classeur ou une liasse de copies d’élèves. Elle sert à ranger des feuilles.</div>`;
+  const manualEn = `
+    <div class="infoIntro"><strong>Farde</strong> gathers, organises, searches and presents a project’s visual references. Current work is stored in the browser and can be archived or transferred with a complete ZIP backup.</div>
+    <h3 class="infoManualTitle">Complete manual</h3><div class="infoManual">
+    <details class="manualSection" open><summary>1. Getting started</summary><div class="manualBody"><ol><li>Give the project a title.</li><li>Choose a section.</li><li>Add a card or import several images.</li><li>Organise, annotate and mark important references.</li><li>Save regularly as a ZIP file.</li></ol></div></details>
+    <details class="manualSection"><summary>2. Sections and boards</summary><div class="manualBody"><p>The section menu displays one board or the complete binder. Each section has its own colour and purpose.</p></div></details>
+    <details class="manualSection"><summary>3. Create and edit a card</summary><div class="manualBody"><p>Click <strong>+ card</strong>, choose a section, add an image, a title, a note and tags. A card can be duplicated, moved or deleted.</p></div></details>
+    <details class="manualSection"><summary>4. Import several images</summary><div class="manualBody"><p><strong>+ images</strong> automatically creates one card per file in the active board. Drag and drop is also available.</p></div></details>
+    <details class="manualSection"><summary>5. Linked references</summary><div class="manualBody"><p>A card in <strong>References</strong> can be linked to several boards. The <strong>Linked refs</strong> button shows or hides them in the relevant board.</p></div></details>
+    <details class="manualSection"><summary>6. Search, favourites and sorting</summary><div class="manualBody"><p>Search covers titles, notes and tags. Favourites limits the display to main references. Quick sort moves cards between sections.</p></div></details>
+    <details class="manualSection"><summary>7. Focus and slideshow</summary><div class="manualBody"><p>The magnifier opens an image in focus view. The round Play button starts the active board slideshow. Arrows, keyboard and touch swipe provide navigation.</p></div></details>
+    <details class="manualSection"><summary>8. Export a slideshow</summary><div class="manualBody"><p>The export button in focus view creates a standalone HTML slideshow of the active board, including its images and the duration selected in Settings.</p></div></details>
+    <details class="manualSection"><summary>9. ZIP backup</summary><div class="manualBody"><p>The ZIP includes project data, cards, tags, board links, settings and local images. It is the recommended format for archiving and transfer.</p></div></details>
+    <details class="manualSection"><summary>10. PDF and shortcuts</summary><div class="manualBody"><p>PDF export is available in Settings. Shortcuts: Ctrl/Cmd + S to save, Ctrl/Cmd + Z to undo, Escape to close, and left/right arrows in focus view.</p></div></details>
+    <details class="manualSection" open><summary>11. Section descriptions</summary><div class="manualBody">${boards}</div></details></div>
+    <div class="infoIntro infoNameNote">In Belgium, a <span class="fardeWord">FARDE</span> is a cardboard folder, a ring binder, or a bundle of pupils’ papers. It is used to store sheets of paper.</div>`;
+  $("#infoContent").innerHTML = isEnglish()?manualEn:manualFr;
+  $("#infoDrawer").classList.add("open");$("#infoDrawer").setAttribute("aria-hidden","false");
+}
+function closeInfo(){ $("#infoDrawer").classList.remove("open"); $("#infoDrawer").setAttribute("aria-hidden","true"); }
+function openSettings(){
+  applyLanguage();
+  $("#saveEditOnClose").checked = data.saveEditOnClose!==false;
+  const delayInput = $("#slideshowDelay");
+  if(delayInput) delayInput.value = data.slideshowDelay || 3;
+  $("#settingsDrawer").classList.add("open");
+  $("#settingsDrawer").setAttribute("aria-hidden","false");
+}
+function closeSettings(){ $("#settingsDrawer").classList.remove("open"); $("#settingsDrawer").setAttribute("aria-hidden","true"); }
+function printClasseur(scope="current", layout="board"){// v10 : export PDF limité aux boards
+  layout = "board";
+  const old = {showAll:data.showAll, activeSection:data.activeSection};
+  const q = currentSearchQuery();
+  if(scope === "all"){
+    data.showAll = true;
+    $("#printTitle").textContent = `${data.projectName ? data.projectName + " — " : ""}Farde — complet`;
+  }else if(q){
+    $("#printTitle").textContent = `${data.projectName ? data.projectName + " — " : ""}Recherche — ${$("#searchInput").value.trim()}`;
+  }else{
+    data.showAll = false;
+    $("#printTitle").textContent = `${data.projectName ? data.projectName + " — " : ""}${sectionById(data.activeSection).title}`;
+  }
+  document.body.classList.remove("print-mode-board","print-mode-sheet");
+  document.body.classList.add(`print-mode-${layout === "sheet" ? "sheet" : "board"}`);
+  render();
+  closeSettings();
+  setTimeout(()=>{
+    window.print();
+    setTimeout(()=>{
+      document.body.classList.remove("print-mode-board","print-mode-sheet");
+      data.showAll = old.showAll;
+      data.activeSection = old.activeSection;
+      render();
+    }, 500);
+  }, 140);
+}
+
+async function slideshowImageSource(entry){
+  if(entry.imageId){
+    try{
+      const blob = await getLocalImage(entry.imageId);
+      if(blob){
+        const compact = await resizeImageBlob(blob,1600,.82).catch(()=>blob) || blob;
+        return await blobToDataURL(compact);
+      }
+    }catch(err){}
+  }
+  return entry.image || "";
+}
+async function exportActiveBoardSlideshow(){
+  const entries = currentEntries();
+  if(!entries.length){ status("Aucune image à exporter"); return; }
+  status("Préparation du diaporama…");
+  const slides = [];
+  for(const entry of entries){
+    const sec = sectionById(entry.section);
+    const src = await slideshowImageSource(entry);
+    if(!src) continue;
+    slides.push({title:entry.title||sec.title,section:sec.title,color:sec.color,src});
+  }
+  if(!slides.length){ status("Aucune image disponible"); return; }
+  const boardTitle = currentSearchQuery() ? `Recherche — ${$("#searchInput").value.trim()}` : (data.showAll ? "Toutes les sections" : sectionById(data.activeSection).title);
+  const projectTitle = data.projectName || "Farde";
+  const delay = Math.max(1,Math.min(20,Number(data.slideshowDelay)||3))*1000;
+  const payload = JSON.stringify(slides).replace(/<\//g,"<\\/");
+  const html = `<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>${esc(projectTitle)} — ${esc(boardTitle)}</title>
+<style>*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;color:#fff;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.stage{position:fixed;inset:0;display:grid;grid-template-rows:auto 1fr auto}.head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:rgba(0,0,0,.72);z-index:3}.head h1{margin:0;font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.counter{font-size:12px;opacity:.75}.slide{position:relative;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#111}.slide img{width:100%;height:100%;object-fit:contain;display:block;animation:fade .28s ease both}.caption{position:absolute;left:0;right:0;bottom:0;padding:32px 18px 16px;background:linear-gradient(transparent,rgba(0,0,0,.68));font-size:14px;font-weight:650}.caption small{display:block;margin-top:4px;opacity:.72;font-size:11px}.controls{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px;background:rgba(0,0,0,.72)}button{width:42px;height:36px;border:1px solid rgba(255,255,255,.3);border-radius:999px;background:rgba(255,255,255,.08);color:#fff;font-size:21px;font-weight:800;display:flex;align-items:center;justify-content:center}button:hover{background:rgba(255,255,255,.18)}button svg{width:17px;height:17px;fill:currentColor}.active{background:#fff;color:#111}@keyframes fade{from{opacity:.15}to{opacity:1}}@media(max-width:600px){.caption{font-size:12px}.head{padding:9px 11px}}</style></head>
+<body><main class="stage"><header class="head"><h1>${esc(projectTitle)} — ${esc(boardTitle)}</h1><span class="counter" id="counter"></span></header><section class="slide" id="slide"></section><footer class="controls"><button id="prev" aria-label="Précédent">‹</button><button id="play" aria-label="Lecture"><svg viewBox="0 0 24 24"><path d="M8 5.5v13L18.5 12z"></path></svg></button><button id="next" aria-label="Suivant">›</button></footer></main>
+<script>const slides=${payload};let index=0,timer=null;const delay=${delay};const slide=document.getElementById('slide'),counter=document.getElementById('counter'),play=document.getElementById('play');const PLAY='<svg viewBox="0 0 24 24"><path d="M8 5.5v13L18.5 12z"></path></svg>';const PAUSE='<svg viewBox="0 0 24 24"><rect x="7" y="5" width="4" height="14" rx="1"></rect><rect x="13" y="5" width="4" height="14" rx="1"></rect></svg>';function render(){const s=slides[index];slide.innerHTML='<img src="'+s.src.replace(/"/g,'&quot;')+'" alt=""><div class="caption">'+escapeHtml(s.title)+'<small>'+escapeHtml(s.section)+'</small></div>';counter.textContent=(index+1)+' / '+slides.length}function escapeHtml(v){return String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function move(d){index=(index+d+slides.length)%slides.length;render()}function stop(){if(timer){clearInterval(timer);timer=null}play.innerHTML=PLAY;play.classList.remove('active')}function toggle(){if(timer){stop();return}timer=setInterval(()=>move(1),delay);play.innerHTML=PAUSE;play.classList.add('active')}document.getElementById('prev').onclick=()=>move(-1);document.getElementById('next').onclick=()=>move(1);play.onclick=toggle;document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')move(-1);if(e.key==='ArrowRight')move(1);if(e.key===' ')toggle();if(e.key==='Escape')stop()});let sx=0;slide.addEventListener('pointerdown',e=>sx=e.clientX);slide.addEventListener('pointerup',e=>{const dx=e.clientX-sx;if(Math.abs(dx)>50)move(dx<0?1:-1)});render();<\/script></body></html>`;
+  const blob = new Blob([html],{type:"text/html;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${safeProjectSlug()}_${String(boardTitle).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9_-]+/g,"_").replace(/^_+|_+$/g,"").toLowerCase()||"board"}_diaporama.html`;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  status(`Diaporama exporté — ${slides.length} image${slides.length>1?"s":""}`);
+}
+
+function blobToDataURL(blob){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+}
+function dataURLToBlob(dataUrl){
+  const parts = String(dataUrl||"").split(",");
+  if(parts.length < 2) return null;
+  const meta = parts[0] || "";
+  const mime = (meta.match(/data:([^;]+)/)||[])[1] || "image/jpeg";
+  const bin = atob(parts[1]);
+  const bytes = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+  return new Blob([bytes],{type:mime});
+}
+
+function safeProjectSlug(){
+  const base = (data.projectName || "farde").trim() || "farde";
+  return base.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9_-]+/g,"_").replace(/^_+|_+$/g,"").toLowerCase() || "farde";
+}
+function downloadJSON(payload,filename){
+  const blob = new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+async function collectExportImages(){
+  const images = {};
+  const ids = [...new Set(data.entries.map(e=>e.imageId).filter(Boolean))];
+  for(const id of ids){
+    try{
+      const blob = await getLocalImage(id);
+      if(!blob) continue;
+      const compact = await resizeImageBlob(blob,1000,.68);
+      images[id] = await blobToDataURL(compact || blob);
+    }catch(e){}
+  }
+  return images;
+}
+function exportJSON(){
+  save();
+  const lightData = {
+    ...data,
+    entries:data.entries.map(e=>({ ...e, imageId:e.imageId ? "" : e.imageId }))
+  };
+  const payload = {
+    app:"Farde",
+    version:"2.3",
+    exportedAt:new Date().toISOString(),
+    imageMode:"light-no-local-images",
+    sections,
+    data:lightData
+  };
+  downloadJSON(payload,`${safeProjectSlug()}_leger.json`);
+  status("JSON léger exporté — sans images locales");
+}
+async function exportFullJSON(){
+  save();
+  status("Export autonome : compression des images…");
+  const images = await collectExportImages();
+  const payload = {
+    app:"Farde",
+    version:"2.3",
+    exportedAt:new Date().toISOString(),
+    imageMode:"embedded-dataurl-compressed",
+    sections,
+    data,
+    images
+  };
+  downloadJSON(payload,`${safeProjectSlug()}_autonome.json`);
+  const count = Object.keys(images).length;
+  status(count ? `Export autonome avec ${count} image${count>1?"s":""}` : "Export autonome exporté");
+}
+async function importEmbeddedImages(parsed){
+  const images = parsed.images || parsed.localImages || {};
+  const entries = normalize(parsed.data || parsed).entries;
+  for(const e of entries){
+    if(!e.imageId) continue;
+    const dataUrl = images[e.imageId];
+    if(!dataUrl) continue;
+    try{
+      const blob = dataURLToBlob(dataUrl);
+      if(blob) await putLocalImage(e.imageId,blob);
+    }catch(err){}
+  }
+}
+async function importJSON(ev){
+  const file = ev.target.files[0]; if(!file) return;
+  try{
+    const parsed = JSON.parse(await file.text());
+    await importEmbeddedImages(parsed);
+    data = normalize(parsed.data || parsed);
+    save(); render(); status(parsed.images || parsed.localImages ? "JSON importé avec images" : "JSON léger importé");
+  }catch(e){ console.error(e); alert("Import impossible : JSON non reconnu."); }
+  ev.target.value = "";
+}
+
+
+/* Export ZIP complet sans bibliothèque externe : archive non compressée contenant projet.json + images/*.jpg.
+   Le JSON reste propre, les images redeviennent de vrais fichiers dans un dossier images. */
+function crc32Table(){
+  if(crc32Table.cache) return crc32Table.cache;
+  const table = new Uint32Array(256);
+  for(let i=0;i<256;i++){
+    let c=i;
+    for(let k=0;k<8;k++) c = (c & 1) ? (0xEDB88320 ^ (c>>>1)) : (c>>>1);
+    table[i]=c>>>0;
+  }
+  return crc32Table.cache=table;
+}
+function crc32(bytes){
+  const table = crc32Table();
+  let c = 0xFFFFFFFF;
+  for(let i=0;i<bytes.length;i++) c = table[(c ^ bytes[i]) & 255] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+function u16(n){const b=new Uint8Array(2); new DataView(b.buffer).setUint16(0,n,true); return b;}
+function u32(n){const b=new Uint8Array(4); new DataView(b.buffer).setUint32(0,n>>>0,true); return b;}
+function strBytes(s){return new TextEncoder().encode(s);}
+function concatBytes(parts){
+  const total = parts.reduce((n,p)=>n+p.length,0);
+  const out = new Uint8Array(total); let o=0;
+  for(const p of parts){out.set(p,o); o+=p.length;}
+  return out;
+}
+async function makeStoredZip(files){
+  const localParts=[], centralParts=[]; let offset=0;
+  for(const file of files){
+    const nameBytes = strBytes(file.name);
+    const dataBytes = file.bytes instanceof Uint8Array ? file.bytes : new Uint8Array(file.bytes);
+    const crc = crc32(dataBytes);
+    const local = concatBytes([u32(0x04034b50),u16(20),u16(0),u16(0),u16(0),u16(0),u32(crc),u32(dataBytes.length),u32(dataBytes.length),u16(nameBytes.length),u16(0),nameBytes,dataBytes]);
+    localParts.push(local);
+    const central = concatBytes([u32(0x02014b50),u16(20),u16(20),u16(0),u16(0),u16(0),u16(0),u32(crc),u32(dataBytes.length),u32(dataBytes.length),u16(nameBytes.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(offset),nameBytes]);
+    centralParts.push(central);
+    offset += local.length;
+  }
+  const centralSize = centralParts.reduce((n,p)=>n+p.length,0);
+  const end = concatBytes([u32(0x06054b50),u16(0),u16(0),u16(files.length),u16(files.length),u32(centralSize),u32(offset),u16(0)]);
+  return new Blob([...localParts,...centralParts,end],{type:"application/zip"});
+}
+async function exportZip(){
+  save();
+  status("Préparation du ZIP complet…");
+  const project = structuredClone(data);
+  const files = [];
+  const imageMap = {};
+  const usedNames = new Set();
+  for(const e of project.entries){
+    if(!e.imageId) continue;
+    const blob = await getLocalImage(e.imageId).catch(()=>null);
+    if(!blob) continue;
+    const compact = await resizeImageBlob(blob,1400,.74).catch(()=>blob) || blob;
+    let base = (e.title || e.id || "image").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9_-]+/g,"_").replace(/^_+|_+$/g,"").toLowerCase() || "image";
+    let name = `images/${base}.jpg`, i=2;
+    while(usedNames.has(name)) name = `images/${base}_${i++}.jpg`;
+    usedNames.add(name);
+    const bytes = new Uint8Array(await compact.arrayBuffer());
+    files.push({name,bytes});
+    imageMap[e.imageId]=name;
+    e.image = name;
+    e.imageStatus = "locale";
+  }
+  const cleanProject = {...project, entries:project.entries.map(e=>({...e,imageId:"",imageStatus:e.image ? "locale" : computeImageStatus(e)})), imageMode:"zip-linked-images"};
+  const manifest = {app:"Farde",version:"3.2-zip",exportedAt:new Date().toISOString(),projectName:data.projectName||"",settings:{slideshowDelay:data.slideshowDelay,slideshowTransition:data.slideshowTransition,favoriteOnly:data.favoriteOnly,showLinkedReferences:data.showLinkedReferences},sections,data:cleanProject,images:imageMap};
+  files.unshift({name:"projet.json",bytes:strBytes(JSON.stringify(manifest,null,2))});
+  const zip = await makeStoredZip(files);
+  const url = URL.createObjectURL(zip);
+  const a = document.createElement("a");
+  a.href=url; a.download=`${safeProjectSlug()}_farde.zip`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  status(`ZIP complet exporté — ${files.length-1} image${files.length>2?"s":""}`);
+}
+async function readStoredZip(file){
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const view = new DataView(bytes.buffer);
+  const files = new Map();
+  let p=0;
+  while(p < bytes.length-4){
+    const sig = view.getUint32(p,true);
+    if(sig !== 0x04034b50) break;
+    const method = view.getUint16(p+8,true);
+    const compSize = view.getUint32(p+18,true);
+    const nameLen = view.getUint16(p+26,true);
+    const extraLen = view.getUint16(p+28,true);
+    const name = new TextDecoder().decode(bytes.slice(p+30,p+30+nameLen));
+    const start = p+30+nameLen+extraLen;
+    const dataBytes = bytes.slice(start,start+compSize);
+    if(method !== 0) throw new Error("ZIP compressé non pris en charge par cet import local.");
+    files.set(name,dataBytes);
+    p = start + compSize;
+  }
+  return files;
+}
+async function importZip(ev){
+  const file = ev.target.files[0]; if(!file) return;
+  const ok = confirm("Le classeur actuel sera remplacé.\nPensez à sauvegarder avant de continuer.\n\nAnnuler : revenir sans importer.\nOK : Remplacer.");
+  if(!ok){ ev.target.value = ""; return; }
+  try{
+    status("Import ZIP…");
+    const files = await readStoredZip(file);
+    const projectBytes = files.get("projet.json");
+    if(!projectBytes) throw new Error("projet.json absent");
+    const parsed = JSON.parse(new TextDecoder().decode(projectBytes));
+    const next = normalize(parsed.data || parsed);
+    let restored = 0;
+    for(const e of next.entries){
+      if(!e.image) continue;
+      const bytes = files.get(e.image);
+      if(!bytes) continue;
+      const imageId = "img_" + uid();
+      await putLocalImage(imageId,new Blob([bytes],{type:"image/jpeg"}));
+      e.imageId = imageId;
+      e.originalFileName = e.originalFileName || e.image.split("/").pop() || "";
+      e.image = "";
+      e.imageStatus = "locale";
+      restored++;
+    }
+    pushHistory("Importer ZIP");
+    if(parsed.settings){ next.slideshowDelay = Number(parsed.settings.slideshowDelay)||next.slideshowDelay; next.slideshowTransition = parsed.settings.slideshowTransition||next.slideshowTransition; next.favoriteOnly = !!parsed.settings.favoriteOnly; next.showLinkedReferences = !!parsed.settings.showLinkedReferences; }
+    data = next;
+    save(); render(); status(`ZIP importé — ${restored} image${restored>1?"s":""} restaurée${restored>1?"s":""}`);
+  }catch(e){ console.error(e); alert("Import ZIP impossible. L’import actuel relit les ZIP exportés par cette application."); }
+  ev.target.value = "";
+}
+
+function assignEntrySection(id,sectionId){
+  const e = data.entries.find(x=>x.id===id);
+  if(!e || e.section===sectionId) return;
+  pushHistory("Tri rapide");
+  e.section = sectionId;
+  if(sectionId !== "references") e.linkedSections = [];
+  save();
+  render();
+  status(`Classé dans ${sectionById(sectionId).title}`);
+}
+
+let dragState = null;
+let justDragged = false;
+function bindCards(){
+  grid.querySelectorAll(".zoomBtn").forEach(btn=>{
+    btn.addEventListener("pointerdown",e=>e.stopPropagation());
+    btn.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();zoomMoveDirection = 0; openZoom(btn.dataset.zoom);});
+  });
+  grid.querySelectorAll(".quickSortDot").forEach(btn=>{
+    btn.addEventListener("click",e=>{
+      e.preventDefault(); e.stopPropagation();
+      assignEntrySection(btn.dataset.id, btn.dataset.quickSection);
+    });
+  });
+  grid.querySelectorAll(".moveBtn").forEach(btn=>{
+    btn.addEventListener("pointerdown",startCardDrag);
+    btn.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();});
+  });
+  grid.querySelectorAll(".card").forEach(card=>{
+    card.addEventListener("click",e=>{
+      if(e.target.closest(".zoomBtn,.moveBtn")) return;
+      if(justDragged){ e.preventDefault(); e.stopPropagation(); return; }
+      openEdit(card.dataset.id);
+    });
+    card.addEventListener("contextmenu",e=>{ if(dragState){e.preventDefault(); e.stopPropagation();} });
+  });
+}
+function armDrag(card,x,y,pointerType,pointerId){
+  const delay = pointerType === "touch" || pointerType === "pen" ? 620 : 230;
+  dragState = {id:card.dataset.id,card,startX:x,startY:y,lastX:x,lastY:y,armed:false,target:null,pointerId,timer:null,cancelled:false};
+  dragState.timer = setTimeout(()=>{
+    const d = dragState;
+    if(!d || d.id !== card.dataset.id || d.cancelled) return;
+    d.armed = true;
+    d.card.classList.add("dragReady","dragging");
+    document.body.classList.add("dragging-card");
+    justDragged = true;
+    try{card.setPointerCapture?.(pointerId)}catch(e){}
+    if(navigator.vibrate) try{navigator.vibrate(18)}catch(e){}
+    status("Déplacement actif");
+  }, delay);
+}
+function startCardDrag(e){
+  const handle = e.target.closest(".moveBtn");
+  if(!handle) return;
+  const card = handle.closest(".card");
+  if(!card) return;
+  if(e.button !== 0 && e.pointerType !== "touch" && e.pointerType !== "pen") return;
+  e.preventDefault();
+  e.stopPropagation();
+  armDrag(card,e.clientX,e.clientY,e.pointerType,e.pointerId);
+  document.addEventListener("pointermove",moveCardDrag,{passive:false});
+  document.addEventListener("pointerup",endCardDrag,{passive:false});
+  document.addEventListener("pointercancel",cancelCardDrag,{passive:false});
+}
+function cardAtPoint(x,y,dragCard){
+  const old = dragCard.style.visibility;
+  dragCard.style.visibility = "hidden";
+  const el = document.elementFromPoint(x,y)?.closest(".card");
+  dragCard.style.visibility = old;
+  return el && el !== dragCard ? el : null;
+}
+function moveCardDrag(e){
+  const d = dragState; if(!d) return;
+  const dx = e.clientX-d.startX, dy = e.clientY-d.startY;
+  const dist = Math.hypot(dx,dy);
+  d.lastX=e.clientX; d.lastY=e.clientY;
+  if(!d.armed){
+    if(dist > 16){ d.cancelled=true; clearTimeout(d.timer); cleanupDrag(); dragState=null; }
+    return;
+  }
+  e.preventDefault();
+  d.card.style.transform = `translate(${dx}px,${dy}px) scale(.985)`;
+  if(d.target) d.target.classList.remove("dropTarget");
+  d.target = cardAtPoint(e.clientX,e.clientY,d.card);
+  if(d.target) d.target.classList.add("dropTarget");
+}
+function cleanupDrag(){
+  document.removeEventListener("pointermove",moveCardDrag);
+  document.removeEventListener("pointerup",endCardDrag);
+  document.removeEventListener("pointercancel",cancelCardDrag);
+  document.body.classList.remove("dragging-card");
+}
+function endCardDrag(e){ finishCardDrag(e.clientX,e.clientY,false); }
+function cancelCardDrag(e){ finishCardDrag(e.clientX,e.clientY,true); }
+function finishCardDrag(x,y,cancelled){
+  const d = dragState; if(!d) return;
+  clearTimeout(d.timer); cleanupDrag();
+  if(d.target) d.target.classList.remove("dropTarget");
+  d.card.classList.remove("dragReady","dragging");
+  d.card.style.transform = "";
+  if(d.armed && !cancelled){
+    const target = d.target || cardAtPoint(x,y,d.card);
+    if(target && target.dataset.id && target.dataset.id !== d.id){
+      pushHistory("Déplacer fiche");
+      reorderEntries(d.id,target.dataset.id,y,target);
+      save(); render(); status("Ordre modifié");
+    }
+    justDragged = true;
+    setTimeout(()=>justDragged=false,350);
+  }
+  dragState=null;
+}
+function reorderEntries(id,targetId,clientY,targetEl){
+  const from = data.entries.findIndex(x=>x.id===id); if(from<0) return;
+  const [moved] = data.entries.splice(from,1);
+  let insert = data.entries.findIndex(x=>x.id===targetId);
+  const r = targetEl.getBoundingClientRect();
+  if(clientY > r.top + r.height/2) insert++;
+  data.entries.splice(Math.max(0,insert),0,moved);
+}
+
+function droppedImageFiles(dt){
+  const files = [];
+  if(dt?.items && dt.items.length){
+    for(const item of Array.from(dt.items)){
+      if(item.kind === "file"){
+        const f = item.getAsFile();
+        if(f && f.type && f.type.startsWith("image/")) files.push(f);
+      }
+    }
+  }
+  if(!files.length && dt?.files){
+    files.push(...Array.from(dt.files).filter(f=>f.type && f.type.startsWith("image/")));
+  }
+  return files;
+}
+function setDropActive(active){
+  const main = document.querySelector(".main");
+  const hint = $("#dropHint");
+  if(main) main.classList.toggle("dropActive", !!active);
+  if(hint) hint.classList.toggle("show", !!active);
+}
+function bindImageDrop(){
+  let dropDepth = 0;
+  document.addEventListener("dragenter",e=>{
+    const files = droppedImageFiles(e.dataTransfer);
+    if(!files.length) return;
+    e.preventDefault();
+    dropDepth++;
+    setDropActive(true);
+  });
+  document.addEventListener("dragover",e=>{
+    const files = droppedImageFiles(e.dataTransfer);
+    if(!files.length) return;
+    e.preventDefault();
+    if(e.dataTransfer) e.dataTransfer.dropEffect = "copy";
+    setDropActive(true);
+  });
+  document.addEventListener("dragleave",e=>{
+    dropDepth = Math.max(0, dropDepth-1);
+    if(!dropDepth) setDropActive(false);
+  });
+  document.addEventListener("drop",async e=>{
+    const files = droppedImageFiles(e.dataTransfer);
+    if(!files.length) return;
+    e.preventDefault();
+    dropDepth = 0;
+    setDropActive(false);
+    await createCardsFromImageFiles(files,"drop");
+  });
+}
+
+let zoomSwipe = null;
+function zoomPointerDown(e){
+  if(!$("#zoomDrawer").classList.contains("open")) return;
+  zoomSwipe = {x:e.clientX,y:e.clientY,time:Date.now()};
+}
+function zoomPointerUp(e){
+  if(!zoomSwipe) return;
+  const dx = e.clientX - zoomSwipe.x;
+  const dy = e.clientY - zoomSwipe.y;
+  const dt = Date.now() - zoomSwipe.time;
+  zoomSwipe = null;
+  if(Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy)*1.25 && dt < 900){
+    e.preventDefault();
+    e.stopPropagation();
+    shiftZoom(dx < 0 ? 1 : -1);
+  }
+}
+
+setSectionLanguage();
+initSelects();
+applyLanguage();
+bindImageDrop();
+updateHistoryButtons();
+sectionFilter.addEventListener("change",()=>{data.showAll=sectionFilter.value==="__all"; if(!data.showAll)data.activeSection=sectionFilter.value; save(); render();});
+$("#sectionPickerBtn").addEventListener("click",e=>{e.preventDefault();e.stopPropagation();toggleSectionPicker();});
+document.addEventListener("click",e=>{if(!e.target.closest("#sectionPicker"))closeSectionPicker();});
+$("#searchInput").addEventListener("input",render);
+$("#favoriteFilterBtn").addEventListener("click",()=>{data.favoriteOnly=!data.favoriteOnly; save(); render(); status(data.favoriteOnly?tr("Favoris seuls","Favourites only"):tr("Toutes les fiches","All cards"));});
+$("#linkedRefsBtn").addEventListener("click",()=>{if(data.showAll || currentSearchQuery() || data.activeSection==="references") return; data.showLinkedReferences=!data.showLinkedReferences; save(); render(); status(data.showLinkedReferences?tr("Références liées visibles","Linked references visible"):tr("Références liées masquées","Linked references hidden"));});
+$("#quickSortBtn").addEventListener("click",()=>{data.quickSortMode=!data.quickSortMode; save(); render(); status(data.quickSortMode?tr("Tri rapide actif","Quick sort enabled"):tr("Tri rapide désactivé","Quick sort disabled"));});
+$("#addBtn").addEventListener("click",()=>openEdit(null));
+$("#batchImagesBtn").addEventListener("click",()=>$("#batchImageFiles").click());
+$("#batchImageFiles").addEventListener("change",importBatchImages);
+$("#boardSlideshowBtn").addEventListener("click",startBoardSlideshow);
+$("#infoBtn").addEventListener("click",openInfo);
+$("#settingsBtn").addEventListener("click",openSettings);
+$("#languageToggleBtn").addEventListener("click",()=>{data.language=isEnglish()?"fr":"en";save();applyLanguage();status(tr("Langue : français","Language: English"));});
+$("#undoBtn").addEventListener("click",undo);
+$("#redoBtn").addEventListener("click",redo);
+$("#closeSettings").addEventListener("click",closeSettings);
+$("#settingsDrawer").addEventListener("click",e=>{if(e.target.id==="settingsDrawer")closeSettings();});
+$("#saveEditOnClose").addEventListener("change",e=>{data.saveEditOnClose=e.target.checked; save(); status(data.saveEditOnClose?"Fermeture : enregistrer":"Fermeture : ignorer");});
+$("#printPdfBtn").addEventListener("click",()=>printClasseur($("#pdfScope").value));
+$("#closeInfo").addEventListener("click",closeInfo);
+$("#closeZoom").addEventListener("click",closeZoom);
+$("#zoomPrev").addEventListener("click",()=>shiftZoom(-1));
+$("#zoomNext").addEventListener("click",()=>shiftZoom(1));
+$("#zoomPlay").addEventListener("click",toggleZoomPlay);
+$("#zoomExport").addEventListener("click",exportActiveBoardSlideshow);
+$("#closeEdit").addEventListener("click",closeEdit);
+$("#editDrawer").addEventListener("click",e=>{if(e.target.id==="editDrawer")closeEdit();});
+$("#infoDrawer").addEventListener("click",e=>{if(e.target.id==="infoDrawer")closeInfo();});
+$("#zoomDrawer").addEventListener("click",e=>{if(e.target.id==="zoomDrawer")closeZoom();});
+$("#zoomBody").addEventListener("pointerdown",zoomPointerDown,{passive:true});
+$("#zoomBody").addEventListener("pointerup",zoomPointerUp,{passive:false});
+$("#entryForm").addEventListener("submit",submitEntry);
+$("#deleteBtn").addEventListener("click",deleteCurrent);
+$("#duplicateBtn").addEventListener("click",duplicateCurrent);
+$("#entryImage").addEventListener("input",updatePreview);
+$("#entryTitle").addEventListener("input",updatePreview);
+$("#entrySection").addEventListener("change",()=>{updatePreview(); updateReferenceLinksVisibility();});
+$("#editZoomBtn").addEventListener("click",()=>{
+  const id = $("#entryId").value;
+  if(!id) return;
+  zoomMoveDirection = 0;
+  openZoom(id);
+});
+$("#chooseImageBtn").addEventListener("click",()=>$("#imageFile").click());
+$("#imageFile").addEventListener("change",chooseLocalImage);
+$("#removeImageBtn").addEventListener("click",removeEntryImage);
+$("#saveBtn").addEventListener("click",exportZip);
+let lastProjectName = data.projectName || "";
+$("#projectName").addEventListener("focus",()=>{lastProjectName = data.projectName || "";});
+$("#projectName").addEventListener("input",e=>{data.projectName=e.target.value.trim(); save();});
+$("#projectName").addEventListener("change",()=>{if((data.projectName||"") !== lastProjectName){undoStack.push({label:"Renommer projet", data:{...data, projectName:lastProjectName}}); if(undoStack.length>HISTORY_LIMIT) undoStack.shift(); redoStack=[]; updateHistoryButtons();}});
+$("#importZipFile").addEventListener("change",importZip);
+window.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){closeZoom();closeEdit();closeInfo();closeSettings();}
+  if($("#zoomDrawer").classList.contains("open") && (e.key==="ArrowRight" || e.key==="ArrowLeft")){
+    e.preventDefault();
+    shiftZoom(e.key==="ArrowRight" ? 1 : -1);
+  }
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="s"){e.preventDefault();exportZip();}
+  if((e.metaKey||e.ctrlKey)&&!e.shiftKey&&e.key.toLowerCase()==="z"){e.preventDefault();undo();}
+  if(((e.metaKey||e.ctrlKey)&&e.shiftKey&&e.key.toLowerCase()==="z") || ((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="y")){e.preventDefault();redo();}
+});
+applyLanguage();
+</script>
+</body>
+</html>
