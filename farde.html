@@ -17,8 +17,8 @@ Marques, logos et signes distinctifs Eigrutel / Eigrutel Lab / Eigrutel BD Acade
 <meta name="version" content="1.0.0">
 <meta name="date" content="2026-08-01">
 <meta name="apple-mobile-web-app-title" content="Farde">
-<link rel="icon" type="image/png" href="favicon/favfarde.png">
-<link rel="apple-touch-icon" href="favicon/favfarde.png">
+<link rel="icon" type="image/png" href="favicon/favclasseur.png">
+<link rel="apple-touch-icon" href="favicon/favclasseur.png">
 <style>
 /* Palette et variables globales / Global palette and variables */
 :root{
@@ -477,6 +477,23 @@ body.quick-sort-mode .quickSortPanel{display:grid}
 /* v24 — bascule bilingue */
 .languageSwitchRow{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--texte);font-size:13px}
 .languageToggleBtn{min-width:72px;text-transform:lowercase;font-weight:700}
+
+
+
+/* Couleurs des intercalaires restaurées / Restored section colours */
+.sectionPickerOption{
+  border-left:12px solid var(--sectionColor,#1F3A44)!important;
+  background:#fff!important;
+  padding-left:12px!important;
+}
+.sectionPickerOption:hover,
+.sectionPickerOption.active{
+  background:rgba(31,58,68,.06)!important;
+}
+.sectionPickerBtn{
+  border-color:var(--pickerColor,#1F3A44)!important;
+  box-shadow:inset 8px 0 0 var(--pickerColor,#1F3A44)!important;
+}
 
 </style>
 </head>
@@ -947,7 +964,8 @@ function initSelects(preserve=false){
   sectionFilter.innerHTML = `<option value="__all">${tr("Toutes les sections","All sections")}</option>` + sections.map(s=>`<option value="${s.id}">${esc(s.title)}</option>`).join("");
   entrySection.innerHTML = sections.map(s=>`<option value="${s.id}">${esc(s.title)}</option>`).join("");
   const menu = $("#sectionPickerMenu");
-  if(menu) menu.innerHTML = `<button class="sectionPickerOption" type="button" role="option" data-section="__all"><span class="sectionOptionDot" style="background:#1F3A44"></span><span>${tr("Toutes les sections","All sections")}</span></button>` + sections.map(s=>`<button class="sectionPickerOption" type="button" role="option" data-section="${esc(s.id)}"><span class="sectionOptionDot" style="background:${esc(s.color)}"></span><span>${esc(s.title)}</span></button>`).join("");
+  /* Couleurs propres à chaque intercalaire / One colour for each section */
+  if(menu) menu.innerHTML = `<button class="sectionPickerOption" type="button" role="option" data-section="__all" style="--sectionColor:#1F3A44"><span class="dot"></span><span>${tr("Toutes les sections","All sections")}</span></button>` + sections.map(s=>`<button class="sectionPickerOption" type="button" role="option" data-section="${esc(s.id)}" style="--sectionColor:${esc(s.color)}"><span class="dot"></span><span>${esc(s.title)}</span></button>`).join("");
   if(menu) menu.querySelectorAll(".sectionPickerOption").forEach(btn=>btn.addEventListener("click",()=>{data.showAll=btn.dataset.section==="__all";if(!data.showAll)data.activeSection=btn.dataset.section;save();closeSectionPicker();render();}));
   if(!preserve) render();
 }
