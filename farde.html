@@ -1012,7 +1012,14 @@ function syncSectionPicker(){
   if(menu) menu.querySelectorAll(".sectionPickerOption").forEach(o=>o.classList.toggle("active",o.dataset.section===current.id));
 }
 
-function currentSearchQuery(){ return ($("#searchInput")?.value || "").trim().toLowerCase(); }
+function normalizeSearchText(text){
+  return String(text || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+function currentSearchQuery(){ return normalizeSearchText($("#searchInput")?.value); }
 function isLinkedReferenceForActiveBoard(e){
   return !!(data.showLinkedReferences && !data.showAll && !currentSearchQuery() && data.activeSection !== "references" && e.section === "references" && Array.isArray(e.linkedSections) && e.linkedSections.includes(data.activeSection));
 }
@@ -1021,7 +1028,9 @@ function currentEntries(){
   return data.entries.filter(e=>{
     if(data.favoriteOnly && !e.fav) return false;
     const linkedTitles = Array.isArray(e.linkedSections) ? e.linkedSections.map(id=>sectionById(id).title).join(" ") : "";
-    const hay = `${e.title||""} ${e.short||""} ${e.tags||""} ${sectionById(e.section).title} ${linkedTitles}`.toLowerCase();
+    const hay = normalizeSearchText(
+      `${e.title||""} ${e.short||""} ${e.tags||""} ${sectionById(e.section).title} ${linkedTitles}`
+    );
     if(q) return hay.includes(q);
     return data.showAll || e.section===data.activeSection || isLinkedReferenceForActiveBoard(e);
   }).map(e=>({...e,_linkedRef:isLinkedReferenceForActiveBoard(e)}));
@@ -1675,7 +1684,7 @@ async function exportZip(){
   const zip = await makeStoredZip(files);
   const url = URL.createObjectURL(zip);
   const a = document.createElement("a");
-  a.href=url; a.download=`${safeProjectSlug()}_farde.zip`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  a.href=url; a.download=`${safeProjectSlug()}_farde.zip`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),10000);
   status(`ZIP complet exporté — ${files.length-1} image${files.length>2?"s":""}`);
 }
 async function readStoredZip(file){
