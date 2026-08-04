@@ -16,7 +16,21 @@ Exemple :
 - 2.0.0 → évolution majeure ou changements incompatibles
 
 ---
+## [1.0.1] — 2026-08-04
 
+### Ajouté
+
+- affichage optionnel du titre sur chaque fiche ;
+- commande globale pour afficher ou masquer tous les titres ;
+- suppression directe des fiches depuis les boards ;
+- option permettant de supprimer sans confirmation ;
+- boutons Annuler et Rétablir rétablis sur iPhone.
+
+### Corrigé
+
+- recherche désormais insensible aux accents ;
+- bouton Sauvegarder ZIP des réglages correctement relié à l’export ;
+- amélioration du téléchargement ZIP sur iPhone.
 ## [1.0.0] — 2026-08-01
 
 Première version publique stable.
