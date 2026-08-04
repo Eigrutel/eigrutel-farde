@@ -433,6 +433,8 @@ body.quick-sort-mode .quickSortPanel{display:grid}
 .zoomPlayBtn svg{width:17px;height:17px}
 .ficheZoomBtn{font-size:22px!important;line-height:1!important;margin-right:2px}
 .ficheZoomBtn:disabled{opacity:.35;cursor:not-allowed}
+.deleteCardBtn{font-size:20px!important;font-weight:500!important;color:var(--rouge)!important}
+.deleteCardBtn:hover{background:var(--rouge)!important;border-color:var(--rouge)!important;color:#fff!important}
 
 
 /* v22 — export du diaporama du board actif */
@@ -638,6 +640,10 @@ body.quick-sort-mode .quickSortPanel{display:grid}
           <input id="saveEditOnClose" type="checkbox">
           <span>Enregistrer les changements à la fermeture d’une fiche</span>
         </label>
+        <label class="checkOption">
+          <input id="deleteWithoutConfirm" type="checkbox">
+          <span>Supprimer directement sans confirmation<small>Par défaut, une confirmation est demandée avant chaque suppression.</small></span>
+        </label>
       </section>
       <section class="settingsGroup">
         <h3>Lecture</h3>
@@ -785,7 +791,9 @@ function applyLanguage(){
   setText("label[for='projectNameSettings']",tr("Titre du projet","Project title"));
   const importZip=document.querySelector("label[for='importZipFile'].btn");if(importZip)importZip.textContent=tr("Importer ZIP","Import ZIP");
   setText("#settingsSaveBtn",tr("Sauvegarder ZIP","Save ZIP"));
-  const settingCheck=document.querySelector("#settingsDrawer .checkOption span");if(settingCheck)settingCheck.textContent=tr("Enregistrer les changements à la fermeture d’une fiche","Save changes when closing a card");
+  const settingChecks=document.querySelectorAll("#settingsDrawer .checkOption span");
+  if(settingChecks[0])settingChecks[0].textContent=tr("Enregistrer les changements à la fermeture d’une fiche","Save changes when closing a card");
+  if(settingChecks[1])settingChecks[1].innerHTML=tr("Supprimer directement sans confirmation<small>Par défaut, une confirmation est demandée avant chaque suppression.</small>","Delete directly without confirmation<small>By default, confirmation is required before each deletion.</small>");
   setText("label[for='slideshowDelay']",tr("Temps par image","Time per image"));setText("label[for='pdfScope']",tr("Portée","Scope"));
   const opts=document.querySelectorAll("#pdfScope option");if(opts[0])opts[0].textContent=tr("Board affiché / intercalaire actif","Displayed board / active section");if(opts[1])opts[1].textContent=tr("Classeur complet","Complete binder");
   setText("#printPdfBtn",tr("Exporter PDF","Export PDF"));
@@ -798,7 +806,7 @@ function applyLanguage(){
 }
 
 /* Structure des données enregistrées / Saved-data structure */
-const defaultData = {language:"fr",projectName:"",activeSection:"moodboard",showAll:false,favoriteOnly:false,showLinkedReferences:false,quickSortMode:false,saveEditOnClose:true,slideshowDelay:3,slideshowTransition:"fade",entries:[]};
+const defaultData = {language:"fr",projectName:"",activeSection:"moodboard",showAll:false,favoriteOnly:false,showLinkedReferences:false,quickSortMode:false,saveEditOnClose:true,deleteWithoutConfirm:false,slideshowDelay:3,slideshowTransition:"fade",entries:[]};
 let data = load();
 let currentEditId = null;
 let undoStack = [];
@@ -818,7 +826,7 @@ function load(){
   }catch(e){ return structuredClone(defaultData); }
 }
 function normalize(obj){
-  return {language:obj.language==="en"?"en":"fr",projectName:obj.projectName||"",activeSection:obj.activeSection||"moodboard",showAll:!!obj.showAll,favoriteOnly:!!obj.favoriteOnly,showLinkedReferences:!!obj.showLinkedReferences,quickSortMode:!!obj.quickSortMode,saveEditOnClose:obj.saveEditOnClose!==false,slideshowDelay: Number(obj.slideshowDelay)||3,slideshowTransition: obj.slideshowTransition||"fade",entries:Array.isArray(obj.entries)?obj.entries.map(e=>({image:"",imageId:"",imageStatus:"",originalFileName:"",linkedSections:[],...e,linkedSections:Array.isArray(e.linkedSections)?e.linkedSections:[]})):[]};
+  return {language:obj.language==="en"?"en":"fr",projectName:obj.projectName||"",activeSection:obj.activeSection||"moodboard",showAll:!!obj.showAll,favoriteOnly:!!obj.favoriteOnly,showLinkedReferences:!!obj.showLinkedReferences,quickSortMode:!!obj.quickSortMode,saveEditOnClose:obj.saveEditOnClose!==false,deleteWithoutConfirm:obj.deleteWithoutConfirm===true,slideshowDelay: Number(obj.slideshowDelay)||3,slideshowTransition: obj.slideshowTransition||"fade",entries:Array.isArray(obj.entries)?obj.entries.map(e=>({image:"",imageId:"",imageStatus:"",originalFileName:"",linkedSections:[],...e,linkedSections:Array.isArray(e.linkedSections)?e.linkedSections:[]})):[]};
 }
 function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(data));}
 function sectionById(id){return sections.find(s=>s.id===id)||sections[0];}
@@ -1090,6 +1098,7 @@ function render(){
       <div class="cardControls" aria-label="Actions de la fiche">
         <button class="cardToolBtn zoomBtn" type="button" data-zoom="${esc(e.id)}" title="${tr("Agrandir","Enlarge")}" aria-label="${tr("Agrandir","Enlarge")}">⌕</button>
         ${moveControl}
+        <button class="cardToolBtn deleteCardBtn" type="button" data-delete="${esc(e.id)}" title="${tr("Supprimer","Delete")}" aria-label="${tr("Supprimer","Delete")}">×</button>
       </div>
       <div class="printMeta"><h3>${esc(e.title||sec.title)}</h3>${e.short?`<p>${esc(e.short)}</p>`:""}${e.tags?`<p><strong>${tr("Tags :","Tags:")}</strong> ${esc(e.tags)}</p>`:""}<p><strong>${tr("Intercalaire :","Section:")}</strong> ${esc(sec.title)}</p></div>
     </article>`;
@@ -1197,24 +1206,23 @@ function submitEntry(ev){
   ev.preventDefault();
   if(saveEntryFromForm()){ closeEdit({skipSave:true}); render(); status("Fiche enregistrée"); }
 }
-async function deleteCurrent(){
-  if(!currentEditId) return;
-  const idToDelete = currentEditId;
+async function deleteEntryById(idToDelete,{closeDrawer=false}={}){
   const e = data.entries.find(x=>x.id===idToDelete);
-  if(!e || !confirm(`Supprimer « ${e.title||"cette fiche"} » ?`)) return;
+  if(!e) return false;
+  if(!data.deleteWithoutConfirm && !confirm(tr(`Supprimer « ${e.title||"cette fiche"} » ?`,`Delete “${e.title||"this card"}”?`))) return false;
 
-  /* Important : la suppression ne doit pas passer par closeEdit() avec sauvegarde automatique.
-     Sinon, quand l’option “enregistrer à la fermeture” est active, la fiche supprimée
-     est recréée depuis les champs encore présents dans le panneau. */
+  /* L’image locale est conservée dans IndexedDB afin que la commande Annuler puisse restaurer la fiche. */
   pushHistory("Supprimer fiche");
   data.entries = data.entries.filter(x=>x.id!==idToDelete);
-  /* L’image locale est laissée dans IndexedDB : cela permet à Annuler de restaurer la fiche.
-     Les images orphelines ne sont pas exportées dans le ZIP si aucune fiche ne les utilise. */
-
   save();
-  closeEdit({skipSave:true});
+  if(closeDrawer) closeEdit({skipSave:true});
   render();
-  status("Fiche supprimée");
+  status(tr("Fiche supprimée","Card deleted"));
+  return true;
+}
+async function deleteCurrent(){
+  if(!currentEditId) return;
+  await deleteEntryById(currentEditId,{closeDrawer:true});
 }
 function duplicateCurrent(){
   if(!currentEditId) return;
@@ -1431,6 +1439,7 @@ function closeInfo(){ $("#infoDrawer").classList.remove("open"); $("#infoDrawer"
 function openSettings(){
   applyLanguage();
   $("#saveEditOnClose").checked = data.saveEditOnClose!==false;
+  $("#deleteWithoutConfirm").checked = data.deleteWithoutConfirm===true;
   const delayInput = $("#slideshowDelay");
   if(delayInput) delayInput.value = data.slideshowDelay || 3;
   $("#settingsDrawer").classList.add("open");
@@ -1758,6 +1767,14 @@ function bindCards(){
     btn.addEventListener("pointerdown",e=>e.stopPropagation());
     btn.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();zoomMoveDirection = 0; openZoom(btn.dataset.zoom);});
   });
+  grid.querySelectorAll(".deleteCardBtn").forEach(btn=>{
+    btn.addEventListener("pointerdown",e=>e.stopPropagation());
+    btn.addEventListener("click",async e=>{
+      e.preventDefault();
+      e.stopPropagation();
+      await deleteEntryById(btn.dataset.delete);
+    });
+  });
   grid.querySelectorAll(".quickSortDot").forEach(btn=>{
     btn.addEventListener("click",e=>{
       e.preventDefault(); e.stopPropagation();
@@ -1770,7 +1787,7 @@ function bindCards(){
   });
   grid.querySelectorAll(".card").forEach(card=>{
     card.addEventListener("click",e=>{
-      if(e.target.closest(".zoomBtn,.moveBtn")) return;
+      if(e.target.closest(".zoomBtn,.moveBtn,.deleteCardBtn")) return;
       if(justDragged){ e.preventDefault(); e.stopPropagation(); return; }
       openEdit(card.dataset.id);
     });
@@ -1955,6 +1972,7 @@ $("#redoBtn").addEventListener("click",redo);
 $("#closeSettings").addEventListener("click",closeSettings);
 $("#settingsDrawer").addEventListener("click",e=>{if(e.target.id==="settingsDrawer")closeSettings();});
 $("#saveEditOnClose").addEventListener("change",e=>{data.saveEditOnClose=e.target.checked; save(); status(data.saveEditOnClose?"Fermeture : enregistrer":"Fermeture : ignorer");});
+$("#deleteWithoutConfirm").addEventListener("change",e=>{data.deleteWithoutConfirm=e.target.checked; save(); status(tr(data.deleteWithoutConfirm?"Suppression directe activée":"Confirmation de suppression activée",data.deleteWithoutConfirm?"Direct deletion enabled":"Deletion confirmation enabled"));});
 $("#printPdfBtn").addEventListener("click",()=>printClasseur($("#pdfScope").value));
 $("#closeInfo").addEventListener("click",closeInfo);
 $("#closeZoom").addEventListener("click",closeZoom);
