@@ -1984,6 +1984,7 @@ $("#chooseImageBtn").addEventListener("click",()=>$("#imageFile").click());
 $("#imageFile").addEventListener("change",chooseLocalImage);
 $("#removeImageBtn").addEventListener("click",removeEntryImage);
 $("#saveBtn").addEventListener("click",exportZip);
+$("#settingsSaveBtn").addEventListener("click",exportZip);
 let lastProjectName = data.projectName || "";
 $("#projectName").addEventListener("focus",()=>{lastProjectName = data.projectName || "";});
 $("#projectName").addEventListener("input",e=>{data.projectName=e.target.value.trim(); save();});
