@@ -2,8 +2,8 @@
 <!-- Eigrutel Lab - Atelier d'outils libres pour la bande dessinée
 Programme conçu et développé par Simon Léturgie dans le cadre d'Eigrutel BD Academy.
 Nom : farde
-Version : 1.0.0
-Date : 01-08-2026
+Version : 1.0.1
+Date : 04-08-2026
 JJ Code : GNU AGPL v3.0 ou version ultérieure.
 Documentation et modèles : CC BY-SA 4.0, sauf mention contraire.
 Marques, logos et signes distinctifs Eigrutel / Eigrutel Lab / Eigrutel BD Academy : réservés. -->
@@ -14,8 +14,8 @@ Marques, logos et signes distinctifs Eigrutel / Eigrutel Lab / Eigrutel BD Acade
 <title>Farde</title>
 <meta name="author" content="Simon Léturgie">
 <meta name="application-name" content="Farde">
-<meta name="version" content="1.0.0">
-<meta name="date" content="2026-08-01">
+<meta name="version" content="1.0.1">
+<meta name="date" content="2026-08-04">
 <meta name="apple-mobile-web-app-title" content="Farde">
 <link rel="icon" type="image/png" href="favicon/favfarde.png">
 <link rel="apple-touch-icon" href="favicon/favfarde.png">
@@ -601,7 +601,11 @@ body.quick-sort-mode .quickSortPanel{display:grid}
       </div>
       <label class="checkOption">
         <input id="entryShowText" type="checkbox">
-        <span>Afficher le texte court sur la fiche visuelle<small>À cocher seulement si la grille doit montrer une indication. Sinon la fiche reste image seule.</small></span>
+        <span>Afficher le texte court sur la fiche visuelle<small>Cette option désactive l’affichage du titre.</small></span>
+      </label>
+      <label class="checkOption">
+        <input id="entryShowTitle" type="checkbox">
+        <span>Afficher le titre sur la fiche visuelle<small>Cette option désactive l’affichage du texte court.</small></span>
       </label>
       <label class="checkOption">
         <input id="entryFav" type="checkbox">
@@ -649,6 +653,11 @@ body.quick-sort-mode .quickSortPanel{display:grid}
         <label class="checkOption">
           <input id="deleteWithoutConfirm" type="checkbox">
           <span>Supprimer directement sans confirmation<small>Par défaut, une confirmation est demandée avant chaque suppression.</small></span>
+        </label>
+        <!-- v1.0.1 — affichage global des titres / global title display -->
+        <label class="checkOption">
+          <input id="showAllTitles" type="checkbox">
+          <span>Afficher tous les titres des fiches<small>Cocher affiche tous les titres et masque les textes courts. Décocher masque tous les titres.</small></span>
         </label>
       </section>
       <section class="settingsGroup">
@@ -787,8 +796,9 @@ function applyLanguage(){
   const saveEntry=document.querySelector("#entryForm .panelActions .primary");if(saveEntry)saveEntry.textContent=tr("Enregistrer","Save");
   setText("#duplicateBtn",tr("Dupliquer","Duplicate"));setText("#deleteBtn",tr("Supprimer","Delete"));
   const checks=document.querySelectorAll("#entryForm .checkOption span");
-  if(checks[0])checks[0].innerHTML=tr("Afficher le texte court sur la fiche visuelle<small>À cocher seulement si la grille doit montrer une indication. Sinon la fiche reste image seule.</small>","Show the short text on the visual card<small>Enable only when the grid should display a note. Otherwise the card remains image-only.</small>");
-  if(checks[1])checks[1].innerHTML=tr("Référence principale<small>Ajoute un repère rouge discret sur la fiche.</small>","Main reference<small>Adds a discreet red marker to the card.</small>");
+  if(checks[0])checks[0].innerHTML=tr("Afficher le texte court sur la fiche visuelle<small>Cette option désactive l’affichage du titre.</small>","Show the short text on the visual card<small>This option disables title display.</small>");
+  if(checks[1])checks[1].innerHTML=tr("Afficher le titre sur la fiche visuelle<small>Cette option désactive l’affichage du texte court.</small>","Show the title on the visual card<small>This option disables short-text display.</small>");
+  if(checks[2])checks[2].innerHTML=tr("Référence principale<small>Ajoute un repère rouge discret sur la fiche.</small>","Main reference<small>Adds a discreet red marker to the card.</small>");
   setText("#settingsTitle",tr("Réglages","Settings")); setText("#languageSettingsHeading",tr("Langue / Language","Language / Langue"));
   setText("#languageSettingsText",tr("Interface en français","Interface in English"));
   const langBtn=document.querySelector("#languageToggleBtn");if(langBtn){langBtn.textContent=isEnglish()?"en-fr":"fr-en";langBtn.title=tr("Passer en anglais","Switch to French");langBtn.setAttribute("aria-label",langBtn.title);}
@@ -800,6 +810,7 @@ function applyLanguage(){
   const settingChecks=document.querySelectorAll("#settingsDrawer .checkOption span");
   if(settingChecks[0])settingChecks[0].textContent=tr("Enregistrer les changements à la fermeture d’une fiche","Save changes when closing a card");
   if(settingChecks[1])settingChecks[1].innerHTML=tr("Supprimer directement sans confirmation<small>Par défaut, une confirmation est demandée avant chaque suppression.</small>","Delete directly without confirmation<small>By default, confirmation is required before each deletion.</small>");
+  if(settingChecks[2])settingChecks[2].innerHTML=tr("Afficher tous les titres des fiches<small>Cocher affiche tous les titres et masque les textes courts. Décocher masque tous les titres.</small>","Show all card titles<small>Checking shows all titles and hides short texts. Unchecking hides all titles.</small>");
   setText("label[for='slideshowDelay']",tr("Temps par image","Time per image"));setText("label[for='pdfScope']",tr("Portée","Scope"));
   const opts=document.querySelectorAll("#pdfScope option");if(opts[0])opts[0].textContent=tr("Board affiché / intercalaire actif","Displayed board / active section");if(opts[1])opts[1].textContent=tr("Classeur complet","Complete binder");
   setText("#printPdfBtn",tr("Exporter PDF","Export PDF"));
@@ -1093,7 +1104,9 @@ function render(){
     const img = e.imageId
       ? `<div class="localImageSlot" data-local-image="${esc(e.imageId)}">${fallback}</div>`
       : (e.image ? `<img src="${esc(e.image)}" alt="">` : fallback);
-    const label = e.showText ? `<div class="cardText">${esc(e.short || e.title || sec.title)}</div>` : "";
+    const label = e.showText
+      ? `<div class="cardText">${esc(e.short || e.title || sec.title)}</div>`
+      : (e.showTitle ? `<div class="cardText">${esc(e.title || sec.title)}</div>` : "");
     const quickDots = e._linkedRef ? "" : sections.map(s=>`<button class="quickSortDot ${e.section===s.id?'active':''}" type="button" data-quick-section="${esc(s.id)}" data-id="${esc(e.id)}" style="--dotColor:${esc(s.color)}" title="${esc(s.title)}" aria-label="${esc(tr("Classer dans","Move to"))} ${esc(s.title)}"></button>`).join("");
     const linkedBadge = e._linkedRef ? `<span class="linkedBadge">${tr('Réf. liée','Linked ref')}</span>` : '';
     const moveControl = e._linkedRef ? '' : `<button class="cardToolBtn moveBtn" type="button" data-move="${esc(e.id)}" title="${tr("Déplacer","Move")}" aria-label="${tr("Déplacer","Move")}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18"></path><path d="M7 8l5-5 5 5"></path><path d="M7 16l5 5 5-5"></path></svg></button>`;
@@ -1117,7 +1130,7 @@ function initials(text){return String(text).split(/\s+/).filter(Boolean).slice(0
 /* Ouverture et enregistrement d’une fiche / Card opening and saving */
 function openEdit(id){
   currentEditId = id || null;
-  const e = id ? data.entries.find(x=>x.id===id) : {id:"",section:data.showAll?data.activeSection:data.activeSection,title:"",image:"",imageId:"",short:"",tags:"",showText:false,fav:false,linkedSections:[]};
+  const e = id ? data.entries.find(x=>x.id===id) : {id:"",section:data.showAll?data.activeSection:data.activeSection,title:"",image:"",imageId:"",short:"",tags:"",showText:false,showTitle:false,fav:false,linkedSections:[]};
   if(!e) return;
   $("#editTitle").textContent = id ? tr("Modifier la fiche","Edit card") : tr("Nouvelle fiche","New card");
   $("#entryId").value = e.id || "";
@@ -1129,6 +1142,7 @@ function openEdit(id){
   $("#entryShort").value = e.short || "";
   $("#entryTags").value = e.tags || "";
   $("#entryShowText").checked = !!e.showText;
+  $("#entryShowTitle").checked = !!e.showTitle;
   $("#entryFav").checked = !!e.fav;
   renderReferenceLinks(e.linkedSections || []);
   updateReferenceLinksVisibility();
@@ -1162,7 +1176,7 @@ function collectEntryFromForm(){
   const existing = data.entries.find(e=>e.id===id) || {};
   const image = $("#entryImage").value.trim();
   const imageId = $("#entryImageId").value.trim();
-  return {id,section:entrySection.value,title:$("#entryTitle").value.trim(),image,imageId,short:$("#entryShort").value.trim(),tags:$("#entryTags").value.trim(),showText:$("#entryShowText").checked,fav:$("#entryFav").checked,linkedSections:entrySection.value==="references"?linkedSectionsFromForm():[],originalFileName:$("#entryImageId").dataset.originalFileName||existing.originalFileName||"",imageStatus:computeImageStatus({image,imageId})};
+  return {id,section:entrySection.value,title:$("#entryTitle").value.trim(),image,imageId,short:$("#entryShort").value.trim(),tags:$("#entryTags").value.trim(),showText:$("#entryShowText").checked,showTitle:$("#entryShowTitle").checked,fav:$("#entryFav").checked,linkedSections:entrySection.value==="references"?linkedSectionsFromForm():[],originalFileName:$("#entryImageId").dataset.originalFileName||existing.originalFileName||"",imageStatus:computeImageStatus({image,imageId})};
 }
 function saveEntryFromForm(){
   if(!formHasContent()) return false;
@@ -1286,6 +1300,7 @@ async function createCardsFromImageFiles(files,source="import"){
         short:"",
         tags:"",
         showText:false,
+        showTitle:false,
         fav:false,
         originalFileName:file.name||"",
         imageStatus:"locale"
@@ -1442,10 +1457,21 @@ function openInfo(){
   $("#infoDrawer").classList.add("open");$("#infoDrawer").setAttribute("aria-hidden","false");
 }
 function closeInfo(){ $("#infoDrawer").classList.remove("open"); $("#infoDrawer").setAttribute("aria-hidden","true"); }
+/* v1.0.1 — la case globale reflète l’état réel des fiches.
+   v1.0.1 — the global checkbox reflects the cards' actual state. */
+function syncShowAllTitlesCheckbox(){
+  const box = $("#showAllTitles");
+  if(!box) return;
+  const entries = data.entries || [];
+  const titledCount = entries.filter(e=>e.showTitle===true && !e.showText).length;
+  box.checked = entries.length>0 && titledCount===entries.length;
+  box.indeterminate = titledCount>0 && titledCount<entries.length;
+}
 function openSettings(){
   applyLanguage();
   $("#saveEditOnClose").checked = data.saveEditOnClose!==false;
   $("#deleteWithoutConfirm").checked = data.deleteWithoutConfirm===true;
+  syncShowAllTitlesCheckbox();
   const delayInput = $("#slideshowDelay");
   if(delayInput) delayInput.value = data.slideshowDelay || 3;
   $("#settingsDrawer").classList.add("open");
@@ -1979,6 +2005,25 @@ $("#closeSettings").addEventListener("click",closeSettings);
 $("#settingsDrawer").addEventListener("click",e=>{if(e.target.id==="settingsDrawer")closeSettings();});
 $("#saveEditOnClose").addEventListener("change",e=>{data.saveEditOnClose=e.target.checked; save(); status(data.saveEditOnClose?"Fermeture : enregistrer":"Fermeture : ignorer");});
 $("#deleteWithoutConfirm").addEventListener("change",e=>{data.deleteWithoutConfirm=e.target.checked; save(); status(tr(data.deleteWithoutConfirm?"Suppression directe activée":"Confirmation de suppression activée",data.deleteWithoutConfirm?"Direct deletion enabled":"Deletion confirmation enabled"));});
+
+/* v1.0.1 — commande globale : afficher tous les titres neutralise tous les
+   textes courts ; masquer retire uniquement l’affichage des titres.
+   v1.0.1 — global control: showing every title disables every short text;
+   hiding removes title display only. */
+$("#showAllTitles").addEventListener("change",e=>{
+  pushHistory(e.target.checked ? "Afficher tous les titres" : "Masquer tous les titres");
+  data.entries.forEach(entry=>{
+    entry.showTitle = e.target.checked;
+    if(e.target.checked) entry.showText = false;
+  });
+  save();
+  render();
+  syncShowAllTitlesCheckbox();
+  status(tr(
+    e.target.checked ? "Tous les titres sont affichés" : "Tous les titres sont masqués",
+    e.target.checked ? "All titles are shown" : "All titles are hidden"
+  ));
+});
 $("#printPdfBtn").addEventListener("click",()=>printClasseur($("#pdfScope").value));
 $("#closeInfo").addEventListener("click",closeInfo);
 $("#closeZoom").addEventListener("click",closeZoom);
@@ -1992,6 +2037,12 @@ $("#infoDrawer").addEventListener("click",e=>{if(e.target.id==="infoDrawer")clos
 $("#zoomDrawer").addEventListener("click",e=>{if(e.target.id==="zoomDrawer")closeZoom();});
 $("#zoomBody").addEventListener("pointerdown",zoomPointerDown,{passive:true});
 $("#zoomBody").addEventListener("pointerup",zoomPointerUp,{passive:false});
+$("#entryShowText").addEventListener("change",e=>{
+  if(e.target.checked) $("#entryShowTitle").checked=false;
+});
+$("#entryShowTitle").addEventListener("change",e=>{
+  if(e.target.checked) $("#entryShowText").checked=false;
+});
 $("#entryForm").addEventListener("submit",submitEntry);
 $("#deleteBtn").addEventListener("click",deleteCurrent);
 $("#duplicateBtn").addEventListener("click",duplicateCurrent);
