@@ -2,8 +2,8 @@
 <!-- Eigrutel Lab - Atelier d'outils libres pour la bande dessinée
 Programme conçu et développé par Simon Léturgie dans le cadre d'Eigrutel BD Academy.
 Nom : farde
-Version : 1.0.1
-Date : 04-08-2026
+Version : 1.0.4
+Date : 11-08-2026
 JJ Code : GNU AGPL v3.0 ou version ultérieure.
 Documentation et modèles : CC BY-SA 4.0, sauf mention contraire.
 Marques, logos et signes distinctifs Eigrutel / Eigrutel Lab / Eigrutel BD Academy : réservés. -->
@@ -14,8 +14,8 @@ Marques, logos et signes distinctifs Eigrutel / Eigrutel Lab / Eigrutel BD Acade
 <title>Farde</title>
 <meta name="author" content="Simon Léturgie">
 <meta name="application-name" content="Farde">
-<meta name="version" content="1.0.1">
-<meta name="date" content="2026-08-04">
+<meta name="version" content="1.0.4">
+<meta name="date" content="2026-08-11">
 <meta name="apple-mobile-web-app-title" content="Farde">
 <link rel="icon" type="image/png" href="favicon/favfarde.png">
 <link rel="apple-touch-icon" href="favicon/favfarde.png">
@@ -46,7 +46,29 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .kicker{display:inline-flex;align-items:center;gap:8px;color:var(--rouge);font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
 .kicker:before,.kicker:after{content:"";width:22px;height:1px;background:currentColor;opacity:.65}
 h1{margin:2px 0 0;font-size:clamp(28px,5vw,46px);line-height:.96;letter-spacing:-.055em;color:var(--bleu)}
-.topActions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.btn{min-height:40px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--bleu);padding:0 13px;font-size:12px;font-weight:850;box-shadow:none;display:inline-flex;align-items:center;justify-content:center;text-align:center;gap:6px;text-decoration:none}.btn.primary{min-height:44px;background:var(--rouge);border-color:var(--rouge);color:#fff;padding:0 18px}.btn.icon{width:42px;min-width:42px;padding:0;display:inline-flex;align-items:center;justify-content:center}.btn.gearIcon svg{width:22px;height:22px;stroke:var(--bleu);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}.btn.gearIcon svg circle{fill:var(--papier);stroke:var(--bleu);stroke-width:2}.btn.gearIcon:hover{background:var(--bleu);border-color:var(--bleu)}.btn.gearIcon:hover svg{stroke:#fff}.btn.gearIcon:hover svg circle{fill:var(--bleu);stroke:#fff}.btn.infoIcon{font-size:18px;font-weight:950;line-height:1;color:var(--bleu)}.btn.danger{background:rgba(166,61,64,.09);border-color:rgba(166,61,64,.26);color:var(--rouge)}.btn.ghost{background:transparent}.fileInput{display:none}.filters{display:grid;grid-template-columns:minmax(160px,260px) minmax(180px,1fr) auto;gap:8px;align-items:center}.filters select,.filters input{min-height:38px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--bleu);padding:0 12px;font-size:12px;font-weight:850;outline:0}.filters input{color:var(--txt);font-weight:750}/* Grille des fiches / Card grid */
+.topActions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.btn{min-height:40px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--bleu);padding:0 13px;font-size:12px;font-weight:850;box-shadow:none;display:inline-flex;align-items:center;justify-content:center;text-align:center;gap:6px;text-decoration:none}.btn.primary{min-height:44px;background:var(--rouge);border-color:var(--rouge);color:#fff;padding:0 18px}.btn.icon{width:42px;min-width:42px;padding:0;display:inline-flex;align-items:center;justify-content:center}.btn.gearIcon svg{width:22px;height:22px;stroke:var(--bleu);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}.btn.gearIcon svg circle{fill:var(--papier);stroke:var(--bleu);stroke-width:2}.btn.gearIcon:hover{background:var(--bleu);border-color:var(--bleu)}.btn.gearIcon:hover svg{stroke:#fff}.btn.gearIcon:hover svg circle{fill:var(--bleu);stroke:#fff}.btn.infoIcon{font-size:18px;font-weight:950;line-height:1;color:var(--bleu)}.btn.danger{background:rgba(166,61,64,.09);border-color:rgba(166,61,64,.26);color:var(--rouge)}.btn.ghost{background:transparent}.fileInput{display:none}.filters{display:grid;grid-template-columns:minmax(160px,260px) minmax(180px,1fr) auto;gap:8px;align-items:center}.filters select,.filters input{min-height:38px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--bleu);padding:0 12px;font-size:12px;font-weight:850;outline:0}.filters input{color:var(--txt);font-weight:750}
+/* v1.0.4 — portée de recherche réduite à une simple case / search scope reduced to a simple checkbox */
+.searchScopeOption{
+  width:38px;
+  height:38px;
+  min-width:38px;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:0;
+  background:transparent;
+}
+.searchScopeOption input{
+  width:18px;
+  height:18px;
+  margin:0;
+  padding:0;
+  border-radius:3px;
+  accent-color:var(--rouge);
+  cursor:pointer;
+}
+/* Grille des fiches / Card grid */
 .main{width:min(1180px,100%);margin:0 auto;padding:16px}.summary{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 12px;color:var(--muted);font-size:12px;font-weight:750}.activeSection{display:inline-flex;align-items:center;gap:6px}.sectionDot{width:9px;height:9px;border-radius:999px;background:var(--rouge);box-shadow:0 0 0 3px rgba(166,61,64,.10)}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(154px,1fr));gap:10px}.card{position:relative;aspect-ratio:4/5;border-radius:16px;background:#E7E1D7;border:1px solid rgba(31,58,68,.14);box-shadow:0 8px 18px rgba(31,58,68,.09);overflow:hidden;transition:transform .12s ease,box-shadow .12s ease;cursor:grab;touch-action:pan-y;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}.card:hover{transform:translateY(-1px);box-shadow:0 12px 24px rgba(31,58,68,.13)}.card.dragReady{outline:2px solid rgba(31,58,68,.26);outline-offset:2px}.card.dragging{opacity:.94;cursor:grabbing;box-shadow:0 18px 34px rgba(31,58,68,.22);z-index:30;touch-action:none}.card.dropTarget{outline:3px solid var(--rouge);outline-offset:3px}body.dragging-card{overflow:hidden;touch-action:none}.card:before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--catColor,var(--bleu));z-index:3}.card img{width:100%;height:100%;object-fit:contain;display:block;background:#F7F2E8}.localImageSlot{width:100%;height:100%;display:block;background:#F7F2E8}.fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;background:var(--catColor,var(--bleu));color:#fff;text-align:center;padding:12px}.fallback b{font-size:20px;line-height:1;font-weight:950;letter-spacing:-.06em}.fallback small{margin-top:7px;font-size:8px;line-height:1.2;font-weight:900;letter-spacing:.12em;text-transform:uppercase;opacity:.78}.cardText{position:absolute;left:7px;right:7px;bottom:7px;z-index:4;padding:7px 8px;border-radius:12px;background:rgba(250,250,247,.92);color:var(--bleu);font-size:11px;font-weight:900;line-height:1.12;box-shadow:0 4px 12px rgba(31,58,68,.12);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.favMark{position:absolute;left:9px;top:11px;z-index:5;width:8px;height:8px;border-radius:50%;background:var(--rouge);box-shadow:0 0 0 3px rgba(250,250,247,.86)}.empty{margin:36px auto;max-width:460px;text-align:center;color:var(--muted);font-size:14px;background:#fff;border:1px dashed var(--line);border-radius:18px;padding:20px}.footer{margin-top:auto;text-align:center;padding:14px 16px;border-top:1px solid var(--line);background:var(--papier)}.footer a{color:var(--bleu);text-decoration:none;font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}/* Panneaux latéraux et fenêtres / Side panels and dialogs */
 .drawer{position:fixed;inset:0;z-index:50;display:none;background:rgba(31,58,68,.28);backdrop-filter:blur(3px)}.drawer.open{display:block}.panel{position:absolute;right:0;top:0;height:100%;width:min(470px,100%);background:var(--papier);border-left:1px solid var(--line);box-shadow:-18px 0 45px rgba(31,58,68,.18);padding:16px;overflow:auto}.panelHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.panelHead h2{margin:0;color:var(--bleu);font-size:20px;letter-spacing:-.02em}.close{width:38px;height:38px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--bleu);font-size:24px;line-height:1}.field{display:grid;gap:6px;margin:0 0 12px}.field label{font-size:10px;font-weight:900;letter-spacing:.10em;text-transform:uppercase;color:var(--muted)}.field input,.field textarea,.field select{width:100%;border:1px solid var(--line);background:#fff;color:var(--txt);border-radius:14px;padding:11px 12px;outline:0}.field textarea{min-height:92px;resize:vertical;line-height:1.45}.field input:focus,.field textarea:focus,.field select:focus{border-color:rgba(166,61,64,.45);box-shadow:0 0 0 4px rgba(166,61,64,.10)}.panelActions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.checkOption{display:flex;align-items:flex-start;gap:9px;padding:10px;border:1px solid var(--line);background:#fff;border-radius:14px;color:var(--bleu);font-size:12px;font-weight:850;line-height:1.35}.checkOption input{width:18px;height:18px;margin:0;accent-color:var(--rouge);flex:0 0 auto}.checkOption small{display:block;margin-top:2px;color:var(--muted);font-size:11px;font-weight:700}.previewBox{height:260px;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#E7E1D7;display:flex;align-items:center;justify-content:center}.previewBox img{width:100%;height:100%;object-fit:contain;display:block;background:#E7E1D7}.previewBox .fallback{position:static;width:100%;height:100%;border-radius:0}.imageTools{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 10px}.imageHint{font-size:11px;line-height:1.4;color:var(--muted);margin:0 0 12px}.note{font-size:12px;line-height:1.45;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px}.infoSection{border:1px solid var(--line);background:#fff;border-radius:16px;padding:12px;margin:0 0 10px}.infoSection h3{margin:0 0 6px;color:var(--bleu);font-size:15px;letter-spacing:-.02em}.infoSection p{margin:0;color:var(--txt);font-size:13px;line-height:1.45}.settingsGrid{display:grid;gap:10px}.settingsGroup{border:1px solid var(--line);background:#fff;border-radius:16px;padding:12px}.settingsGroup h3{margin:0 0 8px;color:var(--bleu);font-size:14px;letter-spacing:-.01em}.settingsGroup .panelActions{margin:0}.printTitle{display:none}.status{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:80;max-width:calc(100vw - 32px);border-radius:999px;background:var(--bleu);color:#fff;padding:9px 13px;font-size:12px;font-weight:800;box-shadow:0 10px 22px rgba(31,58,68,.24);opacity:0;pointer-events:none;transition:opacity .18s ease}.status.show{opacity:1}
 /* Aperçu plein écran et diaporama / Full-screen preview and slideshow */
@@ -259,7 +281,7 @@ h1{margin:2px 0 0;font-size:clamp(28px,5vw,46px);line-height:.96;letter-spacing:
 
 
 /* v6 — sauvegarde ZIP uniquement, vrai champ titre, menu intercalaires coloré */
-.filters{grid-template-columns:minmax(170px,260px) minmax(160px,250px) minmax(180px,1fr) auto auto !important;}
+.filters{grid-template-columns:minmax(170px,260px) minmax(160px,250px) minmax(180px,1fr) auto auto auto !important;}
 .projectNameInput{box-shadow:none!important;border-color:var(--line)!important;}
 .sectionPicker{position:relative;min-height:38px;z-index:30;}
 .sectionPickerBtn{width:100%;height:38px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--bleu);padding:0 12px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:900;text-align:left;}
@@ -392,6 +414,14 @@ body.quick-sort-mode .quickSortPanel{display:grid}
   .filters #projectName{display:none!important}
   .filters .sectionPicker{grid-column:1/-1!important;grid-row:auto!important}
   .filters input[type=search]{grid-column:1/-1!important;grid-row:auto!important}
+  .searchScopeOption{
+    grid-column:auto!important;
+    width:36px!important;
+    min-width:36px!important;
+    height:36px!important;
+    min-height:36px!important;
+    justify-self:start!important;
+  }
   .favoriteFilterBtn,.quickSortBtn{min-height:38px!important;padding:0!important;border-radius:999px!important}
   .favoriteFilterBtn .btnText,.quickSortBtn .btnText{display:none!important}
   .favoriteFilterBtn .btnSym,.quickSortBtn .btnSym{display:inline!important}
@@ -533,6 +563,10 @@ body.quick-sort-mode .quickSortPanel{display:grid}
       </div>
       <select id="sectionFilter" aria-label="Section" class="hidden"></select>
       <input id="searchInput" type="search" placeholder="Rechercher titre, note, tags…">
+      <!-- v1.0.4 — case discrète : cochée = recherche dans l’intercalaire actif / discreet checkbox: checked = search active section only -->
+      <label class="searchScopeOption" for="searchActiveSectionOnly" title="Intercalaire actif seulement">
+        <input id="searchActiveSectionOnly" type="checkbox" aria-label="Intercalaire actif seulement">
+      </label>
       <button class="btn favoriteFilterBtn" id="favoriteFilterBtn" type="button" title="Afficher seulement les références principales" aria-label="Favoris"><span class="btnSym">♡</span><span class="btnText">Favoris</span></button>
       <button class="btn linkedRefsBtn" id="linkedRefsBtn" type="button" title="Afficher les références liées à ce board" aria-label="Références liées"><span class="btnSym">↔</span><span class="btnText">Réfs liées</span></button>
       <button class="btn quickSortBtn" id="quickSortBtn" type="button" title="Classer vite les fiches par intercalaire" aria-label="Tri rapide"><span class="btnSym">□</span><span class="btnText">Tri rapide</span></button>
@@ -681,6 +715,15 @@ body.quick-sort-mode .quickSortPanel{display:grid}
         </div>
         <p class="imageHint">Le PDF exporte les boards. Le navigateur ouvre l’impression : choisir “Enregistrer en PDF”.</p>
       </section>
+
+      <!-- v1.0.2 — remise à zéro complète / full reset -->
+      <section class="settingsGroup">
+        <h3 id="resetSettingsHeading">Réinitialisation</h3>
+        <div class="panelActions">
+          <button class="btn danger" id="resetAppBtn" type="button">Réinitialiser</button>
+        </div>
+        <p class="imageHint" id="resetAppHint">Efface le projet, toutes les fiches, les images locales et remet les réglages par défaut.</p>
+      </section>
     </div>
   </aside>
 </div>
@@ -779,6 +822,11 @@ function applyLanguage(){
   const pn=document.querySelector("#projectName"); if(pn)pn.placeholder=tr("Titre du projet…","Project title…");
   const ps=document.querySelector("#projectNameSettings"); if(ps)ps.placeholder=tr("Titre du projet…","Project title…");
   const search=document.querySelector("#searchInput"); if(search)search.placeholder=tr("Rechercher titre, note, tags…","Search title, note, tags…");
+  const searchScopeBox=document.querySelector(".searchScopeOption");
+  const searchScopeInput=document.querySelector("#searchActiveSectionOnly");
+  const searchScopeText=tr("Intercalaire actif seulement","Active section only");
+  if(searchScopeBox)searchScopeBox.title=searchScopeText;
+  if(searchScopeInput)searchScopeInput.setAttribute("aria-label",searchScopeText);
   setText("#favoriteFilterBtn .btnText",tr("Favoris","Favourites"));
   setText("#linkedRefsBtn .btnText",tr("Réfs liées","Linked refs"));
   setText("#quickSortBtn .btnText",tr("Tri rapide","Quick sort"));
@@ -814,7 +862,10 @@ function applyLanguage(){
   setText("label[for='slideshowDelay']",tr("Temps par image","Time per image"));setText("label[for='pdfScope']",tr("Portée","Scope"));
   const opts=document.querySelectorAll("#pdfScope option");if(opts[0])opts[0].textContent=tr("Board affiché / intercalaire actif","Displayed board / active section");if(opts[1])opts[1].textContent=tr("Classeur complet","Complete binder");
   setText("#printPdfBtn",tr("Exporter PDF","Export PDF"));
-  const hint=document.querySelector("#settingsDrawer .settingsGroup:last-child .imageHint");if(hint)hint.textContent=tr("Le PDF exporte les boards. Le navigateur ouvre l’impression : choisir “Enregistrer en PDF”.","The PDF exports the boards. The browser opens the print dialog: choose “Save as PDF”.");
+  const pdfHint=document.querySelector("#settingsDrawer .settingsGroup:nth-last-child(2) .imageHint");if(pdfHint)pdfHint.textContent=tr("Le PDF exporte les boards. Le navigateur ouvre l’impression : choisir “Enregistrer en PDF”.","The PDF exports the boards. The browser opens the print dialog: choose “Save as PDF”.");
+  setText("#resetSettingsHeading",tr("Réinitialisation","Reset"));
+  setText("#resetAppBtn",tr("Réinitialiser","Reset"));
+  setText("#resetAppHint",tr("Efface le projet, toutes les fiches, les images locales et remet les réglages par défaut.","Deletes the project, all cards and local images, and restores default settings."));
   setText("#infoTitle",tr("Infos & manuel","Info & manual"));setText("#zoomTitle",tr("Aperçu","Preview"));
   setAttr("#zoomPrev","title",tr("Image précédente","Previous image"));setAttr("#zoomNext","title",tr("Image suivante","Next image"));
   setAttr("#zoomPlay","title",tr("Lecture","Play"));setAttr("#zoomExport","title",tr("Exporter le diaporama du board actif","Export active board slideshow"));
@@ -823,7 +874,7 @@ function applyLanguage(){
 }
 
 /* Structure des données enregistrées / Saved-data structure */
-const defaultData = {language:"fr",projectName:"",activeSection:"moodboard",showAll:false,favoriteOnly:false,showLinkedReferences:false,quickSortMode:false,saveEditOnClose:true,deleteWithoutConfirm:false,slideshowDelay:3,slideshowTransition:"fade",entries:[]};
+const defaultData = {language:"fr",projectName:"",activeSection:"moodboard",showAll:false,favoriteOnly:false,showLinkedReferences:false,quickSortMode:false,searchActiveSectionOnly:false,saveEditOnClose:true,deleteWithoutConfirm:false,slideshowDelay:3,slideshowTransition:"fade",entries:[]};
 let data = load();
 let currentEditId = null;
 let undoStack = [];
@@ -843,7 +894,7 @@ function load(){
   }catch(e){ return structuredClone(defaultData); }
 }
 function normalize(obj){
-  return {language:obj.language==="en"?"en":"fr",projectName:obj.projectName||"",activeSection:obj.activeSection||"moodboard",showAll:!!obj.showAll,favoriteOnly:!!obj.favoriteOnly,showLinkedReferences:!!obj.showLinkedReferences,quickSortMode:!!obj.quickSortMode,saveEditOnClose:obj.saveEditOnClose!==false,deleteWithoutConfirm:obj.deleteWithoutConfirm===true,slideshowDelay: Number(obj.slideshowDelay)||3,slideshowTransition: obj.slideshowTransition||"fade",entries:Array.isArray(obj.entries)?obj.entries.map(e=>({image:"",imageId:"",imageStatus:"",originalFileName:"",linkedSections:[],...e,linkedSections:Array.isArray(e.linkedSections)?e.linkedSections:[]})):[]};
+  return {language:obj.language==="en"?"en":"fr",projectName:obj.projectName||"",activeSection:obj.activeSection||"moodboard",showAll:!!obj.showAll,favoriteOnly:!!obj.favoriteOnly,showLinkedReferences:!!obj.showLinkedReferences,quickSortMode:!!obj.quickSortMode,searchActiveSectionOnly:obj.searchActiveSectionOnly===true,saveEditOnClose:obj.saveEditOnClose!==false,deleteWithoutConfirm:obj.deleteWithoutConfirm===true,slideshowDelay: Number(obj.slideshowDelay)||3,slideshowTransition: obj.slideshowTransition||"fade",entries:Array.isArray(obj.entries)?obj.entries.map(e=>({image:"",imageId:"",imageStatus:"",originalFileName:"",linkedSections:[],...e,linkedSections:Array.isArray(e.linkedSections)?e.linkedSections:[]})):[]};
 }
 function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(data));}
 function sectionById(id){return sections.find(s=>s.id===id)||sections[0];}
@@ -927,6 +978,18 @@ async function deleteLocalImage(id){
   return new Promise((resolve,reject)=>{
     const tx = db.transaction("images","readwrite");
     tx.objectStore("images").delete(id);
+    tx.oncomplete = () => {db.close(); resolve();};
+    tx.onerror = () => {db.close(); reject(tx.error);};
+  });
+}
+
+/* v1.0.2 — vide toutes les images locales lors d’une réinitialisation complète.
+   v1.0.2 — clears all locally stored images during a full reset. */
+async function clearLocalImages(){
+  const db = await openImageDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction("images","readwrite");
+    tx.objectStore("images").clear();
     tx.oncomplete = () => {db.close(); resolve();};
     tx.onerror = () => {db.close(); reject(tx.error);};
   });
@@ -1056,7 +1119,13 @@ function currentEntries(){
     const hay = normalizeSearchText(
       `${e.title||""} ${e.short||""} ${e.tags||""} ${sectionById(e.section).title} ${linkedTitles}`
     );
-    if(q) return hay.includes(q);
+    /* v1.0.3 — la recherche porte soit sur tout le classeur, soit uniquement
+       sur l’intercalaire actif. / Search targets either the whole binder or
+       only the active section. */
+    if(q){
+      if(data.searchActiveSectionOnly && e.section!==data.activeSection) return false;
+      return hay.includes(q);
+    }
     return data.showAll || e.section===data.activeSection || isLinkedReferenceForActiveBoard(e);
   }).map(e=>({...e,_linkedRef:isLinkedReferenceForActiveBoard(e)}));
 }
@@ -1478,6 +1547,41 @@ function openSettings(){
   $("#settingsDrawer").setAttribute("aria-hidden","false");
 }
 function closeSettings(){ $("#settingsDrawer").classList.remove("open"); $("#settingsDrawer").setAttribute("aria-hidden","true"); }
+
+/* v1.0.2 — réinitialisation complète : données, images, historique et interface.
+   v1.0.2 — full reset: data, images, history and interface. */
+async function resetApplication(){
+  const ok = confirm(tr(
+    "Réinitialiser Farde ? Le projet, toutes les fiches, les images locales et les réglages seront supprimés.",
+    "Reset Farde? The project, all cards, local images and settings will be deleted."
+  ));
+  if(!ok) return;
+
+  try{ await clearLocalImages(); }
+  catch(err){ console.warn("Impossible de vider les images locales / Unable to clear local images", err); }
+
+  data = structuredClone(defaultData);
+  undoStack = [];
+  redoStack = [];
+  currentEditId = null;
+  currentZoomId = null;
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+
+  const searchInput = $("#searchInput");
+  if(searchInput) searchInput.value = "";
+  const searchScope = $("#searchActiveSectionOnly");
+  if(searchScope) searchScope.checked = false;
+  const projectInput = $("#projectName");
+  if(projectInput) projectInput.value = "";
+  const projectSettingsInput = $("#projectNameSettings");
+  if(projectSettingsInput) projectSettingsInput.value = "";
+
+  updateHistoryButtons();
+  applyLanguage();
+  closeSettings();
+  render();
+  status(tr("Farde réinitialisé","Farde reset"));
+}
 function printClasseur(scope="current", layout="board"){// v10 : export PDF limité aux boards
   layout = "board";
   const old = {showAll:data.showAll, activeSection:data.activeSection};
@@ -1988,7 +2092,17 @@ updateHistoryButtons();
 sectionFilter.addEventListener("change",()=>{data.showAll=sectionFilter.value==="__all"; if(!data.showAll)data.activeSection=sectionFilter.value; save(); render();});
 $("#sectionPickerBtn").addEventListener("click",e=>{e.preventDefault();e.stopPropagation();toggleSectionPicker();});
 document.addEventListener("click",e=>{if(!e.target.closest("#sectionPicker"))closeSectionPicker();});
+$("#searchActiveSectionOnly").checked = data.searchActiveSectionOnly===true;
 $("#searchInput").addEventListener("input",render);
+$("#searchActiveSectionOnly").addEventListener("change",e=>{
+  data.searchActiveSectionOnly = e.target.checked;
+  save();
+  render();
+  status(tr(
+    e.target.checked ? "Recherche limitée à l’intercalaire actif" : "Recherche dans tout le classeur",
+    e.target.checked ? "Search limited to active section" : "Search across whole binder"
+  ));
+});
 $("#favoriteFilterBtn").addEventListener("click",()=>{data.favoriteOnly=!data.favoriteOnly; save(); render(); status(data.favoriteOnly?tr("Favoris seuls","Favourites only"):tr("Toutes les fiches","All cards"));});
 $("#linkedRefsBtn").addEventListener("click",()=>{if(data.showAll || currentSearchQuery() || data.activeSection==="references") return; data.showLinkedReferences=!data.showLinkedReferences; save(); render(); status(data.showLinkedReferences?tr("Références liées visibles","Linked references visible"):tr("Références liées masquées","Linked references hidden"));});
 $("#quickSortBtn").addEventListener("click",()=>{data.quickSortMode=!data.quickSortMode; save(); render(); status(data.quickSortMode?tr("Tri rapide actif","Quick sort enabled"):tr("Tri rapide désactivé","Quick sort disabled"));});
@@ -2025,6 +2139,7 @@ $("#showAllTitles").addEventListener("change",e=>{
   ));
 });
 $("#printPdfBtn").addEventListener("click",()=>printClasseur($("#pdfScope").value));
+$("#resetAppBtn").addEventListener("click",resetApplication);
 $("#closeInfo").addEventListener("click",closeInfo);
 $("#closeZoom").addEventListener("click",closeZoom);
 $("#zoomPrev").addEventListener("click",()=>shiftZoom(-1));
@@ -2064,6 +2179,32 @@ let lastProjectName = data.projectName || "";
 $("#projectName").addEventListener("focus",()=>{lastProjectName = data.projectName || "";});
 $("#projectName").addEventListener("input",e=>{data.projectName=e.target.value.trim(); save();});
 $("#projectName").addEventListener("change",()=>{if((data.projectName||"") !== lastProjectName){undoStack.push({label:"Renommer projet", data:{...data, projectName:lastProjectName}}); if(undoStack.length>HISTORY_LIMIT) undoStack.shift(); redoStack=[]; updateHistoryButtons();}});
+
+/* v1.0.2 — le champ mobile des réglages modifie réellement le titre du projet.
+   v1.0.2 — the mobile settings field now actually updates the project title. */
+let lastProjectNameSettings = data.projectName || "";
+$("#projectNameSettings").addEventListener("focus",()=>{
+  lastProjectNameSettings = data.projectName || "";
+});
+$("#projectNameSettings").addEventListener("input",e=>{
+  data.projectName = e.target.value;
+  const mainProjectInput = $("#projectName");
+  if(mainProjectInput) mainProjectInput.value = e.target.value;
+  save();
+});
+$("#projectNameSettings").addEventListener("change",e=>{
+  data.projectName = e.target.value.trim();
+  e.target.value = data.projectName;
+  const mainProjectInput = $("#projectName");
+  if(mainProjectInput) mainProjectInput.value = data.projectName;
+  save();
+  if((data.projectName||"") !== lastProjectNameSettings){
+    undoStack.push({label:"Renommer projet", data:{...data, projectName:lastProjectNameSettings}});
+    if(undoStack.length>HISTORY_LIMIT) undoStack.shift();
+    redoStack=[];
+    updateHistoryButtons();
+  }
+});
 $("#importZipFile").addEventListener("change",importZip);
 window.addEventListener("keydown",e=>{
   if(e.key==="Escape"){closeZoom();closeEdit();closeInfo();closeSettings();}
