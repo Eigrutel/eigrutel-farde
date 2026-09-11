@@ -2,19 +2,28 @@
 <!-- Eigrutel Lab - Atelier d'outils libres pour la bande dessinée
 Programme conçu et développé par Simon Léturgie dans le cadre d'Eigrutel BD Academy.
 Nom : farde
-Version : 1.0.4
-Date : 11-08-2026
-JJ Code : GNU AGPL v3.0 ou version ultérieure.
+Version : 1.0.5
+Date : 11-09-2026
+Code : GNU AGPL v3.0 ou version ultérieure.
 Documentation et modèles : CC BY-SA 4.0, sauf mention contraire.
 Marques, logos et signes distinctifs Eigrutel / Eigrutel Lab / Eigrutel BD Academy : réservés. -->
 <html lang="fr">
 <head>
+<script>
+const eigrutelEmbedded=parent!==window&&new URLSearchParams(location.search).get('projets')==='1';
+let eigrutelPending=0;
+let fardeBinding=null,fardeMeta={},fardeLast='',fardeRevision=0;
+let fardeImageDB='classeur_visuel_images';
+function validateFardeLink(d){
+ if(!d||d.app!=='farde-local-link'||d.version!==1||typeof d.localId!=='string'||!/^[a-zA-Z0-9_-]{1,100}$/.test(d.localId))throw new Error('Liaison Farde invalide.');
+}
+</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Farde</title>
 <meta name="author" content="Simon Léturgie">
 <meta name="application-name" content="Farde">
-<meta name="version" content="1.0.4">
+<meta name="version" content="1.0.5">
 <meta name="date" content="2026-08-11">
 <meta name="apple-mobile-web-app-title" content="Farde">
 <link rel="icon" type="image/png" href="favicon/favfarde.png">
@@ -47,7 +56,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .kicker:before,.kicker:after{content:"";width:22px;height:1px;background:currentColor;opacity:.65}
 h1{margin:2px 0 0;font-size:clamp(28px,5vw,46px);line-height:.96;letter-spacing:-.055em;color:var(--bleu)}
 .topActions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.btn{min-height:40px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--bleu);padding:0 13px;font-size:12px;font-weight:850;box-shadow:none;display:inline-flex;align-items:center;justify-content:center;text-align:center;gap:6px;text-decoration:none}.btn.primary{min-height:44px;background:var(--rouge);border-color:var(--rouge);color:#fff;padding:0 18px}.btn.icon{width:42px;min-width:42px;padding:0;display:inline-flex;align-items:center;justify-content:center}.btn.gearIcon svg{width:22px;height:22px;stroke:var(--bleu);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}.btn.gearIcon svg circle{fill:var(--papier);stroke:var(--bleu);stroke-width:2}.btn.gearIcon:hover{background:var(--bleu);border-color:var(--bleu)}.btn.gearIcon:hover svg{stroke:#fff}.btn.gearIcon:hover svg circle{fill:var(--bleu);stroke:#fff}.btn.infoIcon{font-size:18px;font-weight:950;line-height:1;color:var(--bleu)}.btn.danger{background:rgba(166,61,64,.09);border-color:rgba(166,61,64,.26);color:var(--rouge)}.btn.ghost{background:transparent}.fileInput{display:none}.filters{display:grid;grid-template-columns:minmax(160px,260px) minmax(180px,1fr) auto;gap:8px;align-items:center}.filters select,.filters input{min-height:38px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--bleu);padding:0 12px;font-size:12px;font-weight:850;outline:0}.filters input{color:var(--txt);font-weight:750}
-/* v1.0.4 — portée de recherche réduite à une simple case / search scope reduced to a simple checkbox */
+/* v1.0.5 — portée de recherche réduite à une simple case / search scope reduced to a simple checkbox */
 .searchScopeOption{
   width:38px;
   height:38px;
@@ -563,7 +572,7 @@ body.quick-sort-mode .quickSortPanel{display:grid}
       </div>
       <select id="sectionFilter" aria-label="Section" class="hidden"></select>
       <input id="searchInput" type="search" placeholder="Rechercher titre, note, tags…">
-      <!-- v1.0.4 — case discrète : cochée = recherche dans l’intercalaire actif / discreet checkbox: checked = search active section only -->
+      <!-- v1.0.5 — case discrète : cochée = recherche dans l’intercalaire actif / discreet checkbox: checked = search active section only -->
       <label class="searchScopeOption" for="searchActiveSectionOnly" title="Intercalaire actif seulement">
         <input id="searchActiveSectionOnly" type="checkbox" aria-label="Intercalaire actif seulement">
       </label>
@@ -767,7 +776,7 @@ body.quick-sort-mode .quickSortPanel{display:grid}
   easier without changing the overall behaviour.
 */
 /* Compatibilité des sauvegardes existantes / Existing-save compatibility */
-const STORAGE_KEY = "classeur_visuel_v2";
+let STORAGE_KEY = eigrutelEmbedded?"farde-projets-unbound":"classeur_visuel_v2";
 
 /* Intercalaires : identifiants, couleurs et descriptions françaises / Sections: IDs, colours and French descriptions */
 const sections = [
@@ -875,7 +884,7 @@ function applyLanguage(){
 
 /* Structure des données enregistrées / Saved-data structure */
 const defaultData = {language:"fr",projectName:"",activeSection:"moodboard",showAll:false,favoriteOnly:false,showLinkedReferences:false,quickSortMode:false,searchActiveSectionOnly:false,saveEditOnClose:true,deleteWithoutConfirm:false,slideshowDelay:3,slideshowTransition:"fade",entries:[]};
-let data = load();
+let data = eigrutelEmbedded?structuredClone(defaultData):load();
 let currentEditId = null;
 let undoStack = [];
 let redoStack = [];
@@ -896,7 +905,7 @@ function load(){
 function normalize(obj){
   return {language:obj.language==="en"?"en":"fr",projectName:obj.projectName||"",activeSection:obj.activeSection||"moodboard",showAll:!!obj.showAll,favoriteOnly:!!obj.favoriteOnly,showLinkedReferences:!!obj.showLinkedReferences,quickSortMode:!!obj.quickSortMode,searchActiveSectionOnly:obj.searchActiveSectionOnly===true,saveEditOnClose:obj.saveEditOnClose!==false,deleteWithoutConfirm:obj.deleteWithoutConfirm===true,slideshowDelay: Number(obj.slideshowDelay)||3,slideshowTransition: obj.slideshowTransition||"fade",entries:Array.isArray(obj.entries)?obj.entries.map(e=>({image:"",imageId:"",imageStatus:"",originalFileName:"",linkedSections:[],...e,linkedSections:Array.isArray(e.linkedSections)?e.linkedSections:[]})):[]};
 }
-function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(data));}
+function save(){if(eigrutelEmbedded&&!fardeBinding)return;localStorage.setItem(STORAGE_KEY,JSON.stringify(data));}
 function sectionById(id){return sections.find(s=>s.id===id)||sections[0];}
 function uid(){return crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random());}
 function esc(str){return String(str??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
@@ -946,7 +955,7 @@ function hexToRgba(hex,alpha=.6){
 
 function openImageDB(){
   return new Promise((resolve,reject)=>{
-    const req = indexedDB.open("classeur_visuel_images",1);
+    const req = indexedDB.open(fardeImageDB,1);
     req.onupgradeneeded = () => req.result.createObjectStore("images");
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
@@ -1295,7 +1304,8 @@ function submitEntry(ev){
   ev.preventDefault();
   if(saveEntryFromForm()){ closeEdit({skipSave:true}); render(); status("Fiche enregistrée"); }
 }
-async function deleteEntryById(idToDelete,{closeDrawer=false}={}){
+async function deleteEntryById(...args){eigrutelPending++;try{return await deleteEntryByIdImpl(...args);}finally{eigrutelPending--;}}
+async function deleteEntryByIdImpl(idToDelete,{closeDrawer=false}={}){
   const e = data.entries.find(x=>x.id===idToDelete);
   if(!e) return false;
   if(!data.deleteWithoutConfirm && !confirm(tr(`Supprimer « ${e.title||"cette fiche"} » ?`,`Delete “${e.title||"this card"}”?`))) return false;
@@ -1324,7 +1334,8 @@ function duplicateCurrent(){
 }
 
 
-async function chooseLocalImage(ev){
+async function chooseLocalImage(...args){eigrutelPending++;try{return await chooseLocalImageImpl(...args);}finally{eigrutelPending--;}}
+async function chooseLocalImageImpl(ev){
   const file = ev.target.files && ev.target.files[0];
   if(!file) return;
   if(!file.type.startsWith("image/")){ alert("Fichier image attendu."); return; }
@@ -1346,7 +1357,8 @@ async function chooseLocalImage(ev){
   ev.target.value = "";
 }
 
-async function createCardsFromImageFiles(files,source="import"){
+async function createCardsFromImageFiles(...args){eigrutelPending++;try{return await createCardsFromImageFilesImpl(...args);}finally{eigrutelPending--;}}
+async function createCardsFromImageFilesImpl(files,source="import"){
   const imageFiles = Array.from(files || []).filter(file=>file && file.type && file.type.startsWith("image/"));
   if(!imageFiles.length) return 0;
   const targetSection = data.activeSection || sections[0].id;
@@ -1391,7 +1403,8 @@ async function importBatchImages(ev){
   ev.target.value = "";
 }
 
-async function removeEntryImage(){
+async function removeEntryImage(...args){eigrutelPending++;try{return await removeEntryImageImpl(...args);}finally{eigrutelPending--;}}
+async function removeEntryImageImpl(){
   /* On conserve l’image locale en base pour permettre annuler/rétablir si la fiche n’est pas encore sauvegardée. */
   $("#entryImageId").value = "";
   $("#entryImage").value = "";
@@ -1550,7 +1563,8 @@ function closeSettings(){ $("#settingsDrawer").classList.remove("open"); $("#set
 
 /* v1.0.2 — réinitialisation complète : données, images, historique et interface.
    v1.0.2 — full reset: data, images, history and interface. */
-async function resetApplication(){
+async function resetApplication(...args){eigrutelPending++;try{return await resetApplicationImpl(...args);}finally{eigrutelPending--;}}
+async function resetApplicationImpl(){
   const ok = confirm(tr(
     "Réinitialiser Farde ? Le projet, toutes les fiches, les images locales et les réglages seront supprimés.",
     "Reset Farde? The project, all cards, local images and settings will be deleted."
@@ -1746,7 +1760,8 @@ async function importEmbeddedImages(parsed){
     }catch(err){}
   }
 }
-async function importJSON(ev){
+async function importJSON(...args){eigrutelPending++;try{return await importJSONImpl(...args);}finally{eigrutelPending--;}}
+async function importJSONImpl(ev){
   const file = ev.target.files[0]; if(!file) return;
   try{
     const parsed = JSON.parse(await file.text());
@@ -1801,10 +1816,13 @@ async function makeStoredZip(files){
   const end = concatBytes([u32(0x06054b50),u16(0),u16(0),u16(files.length),u16(files.length),u32(centralSize),u32(offset),u16(0)]);
   return new Blob([...localParts,...centralParts,end],{type:"application/zip"});
 }
-async function exportZip(){
+async function exportZip(...args){eigrutelPending++;try{return await exportZipImpl(...args);}finally{eigrutelPending--;}}
+async function exportZipImpl(){
   save();
+  if(eigrutelEmbedded && $("#editDrawer").classList.contains("open")){if(!$("#entryId").value)$("#entryId").value=uid();saveEntryFromForm();}
   status("Préparation du ZIP complet…");
   const project = structuredClone(data);
+  const zipSourceSignature=JSON.stringify(data);
   const files = [];
   const imageMap = {};
   const usedNames = new Set();
@@ -1830,6 +1848,7 @@ async function exportZip(){
   const url = URL.createObjectURL(zip);
   const a = document.createElement("a");
   a.href=url; a.download=`${safeProjectSlug()}_farde.zip`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),10000);
+  if(eigrutelEmbedded){fardeMeta.zipName=`${safeProjectSlug()}_farde.zip`;fardeMeta.zipDate=new Date().toISOString();fardeMeta.zipSignature=zipSourceSignature;}
   status(`ZIP complet exporté — ${files.length-1} image${files.length>2?"s":""}`);
 }
 async function readStoredZip(file){
@@ -1853,7 +1872,8 @@ async function readStoredZip(file){
   }
   return files;
 }
-async function importZip(ev){
+async function importZip(...args){eigrutelPending++;try{return await importZipImpl(...args);}finally{eigrutelPending--;}}
+async function importZipImpl(ev){
   const file = ev.target.files[0]; if(!file) return;
   const ok = confirm("Le classeur actuel sera remplacé.\nPensez à sauvegarder avant de continuer.\n\nAnnuler : revenir sans importer.\nOK : Remplacer.");
   if(!ok){ ev.target.value = ""; return; }
@@ -1880,6 +1900,7 @@ async function importZip(ev){
     pushHistory("Importer ZIP");
     if(parsed.settings){ next.slideshowDelay = Number(parsed.settings.slideshowDelay)||next.slideshowDelay; next.slideshowTransition = parsed.settings.slideshowTransition||next.slideshowTransition; next.favoriteOnly = !!parsed.settings.favoriteOnly; next.showLinkedReferences = !!parsed.settings.showLinkedReferences; }
     data = next;
+    if(eigrutelEmbedded){fardeMeta.awaitingZip=false;document.getElementById('projetsFardeNotice')?.remove();fardeMeta.zipName=file.name;fardeMeta.zipDate=new Date().toISOString();fardeMeta.zipSignature=JSON.stringify(data);}
     save(); render(); status(`ZIP importé — ${restored} image${restored>1?"s":""} restaurée${restored>1?"s":""}`);
   }catch(e){ console.error(e); alert("Import ZIP impossible. L’import actuel relit les ZIP exportés par cette application."); }
   ev.target.value = "";
@@ -2216,7 +2237,84 @@ window.addEventListener("keydown",e=>{
   if((e.metaKey||e.ctrlKey)&&!e.shiftKey&&e.key.toLowerCase()==="z"){e.preventDefault();undo();}
   if(((e.metaKey||e.ctrlKey)&&e.shiftKey&&e.key.toLowerCase()==="z") || ((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="y")){e.preventDefault();redo();}
 });
+
+function fardeNotice(text){
+ let el=document.getElementById('projetsFardeNotice');
+ if(!el){el=document.createElement('div');el.id='projetsFardeNotice';el.style.cssText='padding:8px 12px;background:#fff4d6;color:#563d10;font:14px system-ui;position:relative;z-index:30';document.body.prepend(el);}
+ el.textContent=text+' ';const b=document.createElement('button');b.type='button';b.textContent='Charger un ZIP';b.onclick=()=>$('#importZipFile').click();el.appendChild(b);
+}
+function getFardeLink(){
+ if(!fardeBinding)throw new Error('Classeur non lié.');
+ let draft=null;
+ if($('#editDrawer').classList.contains('open')&&formHasContent()){
+   if(!$('#entryId').value)$('#entryId').value=uid();
+   draft=collectEntryFromForm();
+ }
+ const stored={...data,_projetsDraft:draft};
+ const signature=JSON.stringify(stored);
+ localStorage.setItem(STORAGE_KEY,signature);
+ if(signature!==fardeLast){fardeLast=signature;fardeRevision++;}
+ localStorage.setItem(STORAGE_KEY+'-zip',JSON.stringify(fardeMeta));
+ const hasContent=data.entries.length>0||!!draft;
+ return {app:'farde-local-link',version:1,localId:fardeBinding.localId,initialized:true,projectName:data.projectName,revision:fardeRevision,zipName:fardeMeta.zipName||fardeBinding.zipName||'',zipDate:fardeMeta.zipDate||fardeBinding.zipDate||'',needsZip:hasContent&&(!!draft||JSON.stringify(data)!==fardeMeta.zipSignature)};
+}
+function setFardeLink(link,name){
+ validateFardeLink(link);
+ fardeBinding=structuredClone(link);STORAGE_KEY='eigrutel-farde-projet-'+link.localId;fardeImageDB='eigrutel-farde-images-'+link.localId;
+ const raw=localStorage.getItem(STORAGE_KEY);
+ let restored=raw?JSON.parse(raw):null;
+ fardeMeta=JSON.parse(localStorage.getItem(STORAGE_KEY+'-zip')||'{}');
+ if(!restored&&link.initialized)fardeMeta.awaitingZip=true;
+ data=restored?normalize(restored):structuredClone(defaultData);
+ if(!data.projectName)data.projectName=name||link.projectName||'';
+ undoStack=[];redoStack=[];currentEditId=null;fardeLast='';fardeRevision=Number(link.revision)||0;
+ $('#editDrawer').classList.remove('open');
+ setSectionLanguage();initSelects();applyLanguage();render();updateHistoryButtons();
+ if(restored?._projetsDraft){
+   const draft=restored._projetsDraft;const index=data.entries.findIndex(e=>e.id===draft.id);const old=data.entries[index];
+   if(index<0)data.entries.push(draft);else data.entries[index]=draft;
+   openEdit(draft.id);
+   if(index<0)data.entries.pop();else data.entries[index]=old;
+ }
+ if(fardeMeta.awaitingZip)fardeNotice('Classeur absent de ce navigateur. Rechargez '+(link.zipName||'le ZIP Farde du projet')+'.');
+ else fardeNotice('Farde est conservée sur cet appareil. Sauvegardez son ZIP séparément du JSON Projets.');
+}
+window.EigrutelApp={get:getFardeLink,set:setFardeLink};
 applyLanguage();
+</script>
+<script>
+
+if(eigrutelEmbedded) {
+ let loaded=false, signature='', revision=0, acknowledged=0, initId='', timer;
+ const send=(type,more={})=>parent.postMessage({channel:'eigrutel-projets-v1',appId:'farde',type,initId,...more},location.origin);
+ const report=(requestId)=>{
+   if(!loaded) return;
+   if(eigrutelPending>0){if(requestId)setTimeout(()=>report(requestId),100);return;}
+   try {
+     const data=window.EigrutelApp.get(); const next=JSON.stringify(data);
+     if(next!==signature || requestId){ signature=next; revision++; send('save',{data,revision,requestId}); }
+     else if(revision<=acknowledged)send('clean');
+   } catch(error){send('error',{message:error.message,requestId});}
+ };
+ window.addEventListener('message',event=>{
+   if(event.source!==parent || event.origin!==location.origin || event.data?.channel!=='eigrutel-projets-v1') return;
+   const m=event.data;
+   if(m.type==='init'){
+     loaded=false; initId=m.initId;
+     try{window.EigrutelApp.set(m.data,m.name); signature=''; loaded=true;send('loaded');report();}
+     catch(error){send('error',{message:error.message});}
+   }else if(m.initId===initId && m.type==='flush')report(m.requestId);
+   else if(m.initId===initId && m.type==='ack')acknowledged=Math.max(acknowledged,m.revision);
+ });
+ const dirty=()=>{if(!loaded)return;send('dirty');clearTimeout(timer);timer=setTimeout(()=>report(),150);};
+ document.addEventListener('input',dirty); document.addEventListener('change',dirty);document.addEventListener('click',dirty);
+ setInterval(()=>report(),800);
+ window.addEventListener('beforeunload',event=>{if(loaded && (eigrutelPending>0 || revision>acknowledged || JSON.stringify(window.EigrutelApp.get())!==signature)){event.preventDefault();event.returnValue='';}});
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)report();});
+ const ready=()=>send('ready');
+ if(document.readyState!=='loading')ready();else document.addEventListener('DOMContentLoaded',ready,{once:true});
+}
+
 </script>
 </body>
 </html>
