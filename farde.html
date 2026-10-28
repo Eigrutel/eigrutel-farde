@@ -542,6 +542,21 @@ body.quick-sort-mode .quickSortPanel{display:grid}
   box-shadow:inset 8px 0 0 var(--pickerColor,#1F3A44)!important;
 }
 
+
+/* Sélection groupée et gestion des intercalaires */
+.batchActions{position:sticky;top:8px;z-index:12;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px;padding:10px;background:var(--papier);border:1px solid var(--line);border-radius:14px;box-shadow:0 6px 18px rgba(31,58,68,.12)}
+.batchActions select{min-width:170px;flex:1;border:1px solid var(--line);background:#fff;color:var(--bleu);border-radius:12px;padding:9px;font-weight:750}
+.card.selected{outline:3px solid var(--rouge);outline-offset:2px;transform:none!important}
+.cardSelectMark{display:none;position:absolute;right:9px;top:9px;z-index:8;width:27px;height:27px;border:2px solid #fff;border-radius:50%;background:var(--rouge);color:#fff;font-weight:900;align-items:center;justify-content:center;box-shadow:0 2px 8px #0003}
+body.selection-mode .card{cursor:pointer;touch-action:manipulation}
+body.selection-mode .card.selected .cardSelectMark{display:flex}
+body.selection-mode .cardControls,body.selection-mode .quickSortPanel{display:none!important}
+.sectionsDrawer{z-index:60}
+.sectionNameField{display:grid;grid-template-columns:10px 1fr;align-items:center;gap:10px;margin:0 0 9px}
+.sectionNameField .sectionNameDot{width:10px;height:10px;border-radius:50%;background:var(--sectionColor)}
+.sectionNameField input{width:100%;border:1px solid var(--line);background:#fff;color:var(--txt);border-radius:12px;padding:10px 12px}
+@media(max-width:600px){.batchActions{top:4px}.batchActions select{flex-basis:100%}.batchActions .btn{flex:1}}
+
 </style>
 </head>
 <body>
@@ -579,6 +594,7 @@ body.quick-sort-mode .quickSortPanel{display:grid}
       <button class="btn favoriteFilterBtn" id="favoriteFilterBtn" type="button" title="Afficher seulement les références principales" aria-label="Favoris"><span class="btnSym">♡</span><span class="btnText">Favoris</span></button>
       <button class="btn linkedRefsBtn" id="linkedRefsBtn" type="button" title="Afficher les références liées à ce board" aria-label="Références liées"><span class="btnSym">↔</span><span class="btnText">Réfs liées</span></button>
       <button class="btn quickSortBtn" id="quickSortBtn" type="button" title="Classer vite les fiches par intercalaire" aria-label="Tri rapide"><span class="btnSym">□</span><span class="btnText">Tri rapide</span></button>
+      <button class="btn" id="selectionModeBtn" type="button">Sélectionner</button>
       <button class="btn" id="batchImagesBtn" type="button">+ images</button>
       <button class="btn primary" id="addBtn">+ fiche</button>
       <input class="fileInput" id="batchImageFiles" type="file" accept="image/*" multiple>
@@ -590,6 +606,13 @@ body.quick-sort-mode .quickSortPanel{display:grid}
     <div class="summary">
       <span class="activeSection"><span class="sectionDot"></span><span id="sectionLabel"></span></span>
       <span id="countLabel"></span>
+    </div>
+    <div class="batchActions hidden" id="batchActions">
+      <strong id="selectionCount">0 sélectionnée</strong>
+      <select id="batchTargetSection" aria-label="Intercalaire de destination"></select>
+      <button class="btn primary" id="batchMoveBtn" type="button">Déplacer</button>
+      <button class="btn danger" id="batchDeleteBtn" type="button">Supprimer</button>
+      <button class="btn" id="batchCancelBtn" type="button">Annuler</button>
     </div>
     <section class="grid" id="grid" aria-label="Fiches visuelles"></section>
   </main>
@@ -704,6 +727,11 @@ body.quick-sort-mode .quickSortPanel{display:grid}
         </label>
       </section>
       <section class="settingsGroup">
+        <h3>Intercalaires</h3>
+        <p class="imageHint">Personnaliser les noms affichés dans le classeur.</p>
+        <div class="panelActions"><button class="btn" id="manageSectionsBtn" type="button">Gérer les intercalaires</button></div>
+      </section>
+      <section class="settingsGroup">
         <h3>Lecture</h3>
         <div class="field">
           <label for="slideshowDelay">Temps par image</label>
@@ -734,6 +762,15 @@ body.quick-sort-mode .quickSortPanel{display:grid}
         <p class="imageHint" id="resetAppHint">Efface le projet, toutes les fiches, les images locales et remet les réglages par défaut.</p>
       </section>
     </div>
+  </aside>
+</div>
+<!-- Gestion des noms des intercalaires -->
+<div class="drawer sectionsDrawer" id="sectionsDrawer" aria-hidden="true">
+  <aside class="panel" role="dialog" aria-modal="true" aria-labelledby="sectionsTitle">
+    <div class="panelHead"><h2 id="sectionsTitle">Intercalaires</h2><button class="close" id="closeSections" aria-label="Fermer">×</button></div>
+    <p class="imageHint">Modifie le nom affiché de chaque intercalaire. Les fiches restent classées dans leur intercalaire.</p>
+    <div id="sectionNameFields"></div>
+    <div class="panelActions"><button class="btn primary" id="saveSectionNamesBtn" type="button">Enregistrer</button><button class="btn" id="cancelSectionNamesBtn" type="button">Annuler</button></div>
   </aside>
 </div>
 <!-- Informations et manuel bilingue / Bilingual information and manual -->
@@ -814,7 +851,7 @@ sections.forEach(s=>{s.frTitle=s.title;s.frDesc=s.desc;const t=sectionTranslatio
 /* Gestion de la langue de l’interface / Interface language management */
 function isEnglish(){return data?.language==="en";}
 function tr(fr,en){return isEnglish()?en:fr;}
-function setSectionLanguage(){sections.forEach(s=>{s.title=isEnglish()?s.enTitle:s.frTitle;s.desc=isEnglish()?s.enDesc:s.frDesc;});}
+function setSectionLanguage(){sections.forEach(s=>{const customTitle=data?.sectionTitles?.[s.id];s.title=(typeof customTitle==="string"?customTitle.trim():"")||(isEnglish()?s.enTitle:s.frTitle);s.desc=isEnglish()?s.enDesc:s.frDesc;});}
 function setText(selector,text){const el=document.querySelector(selector);if(el)el.textContent=text;}
 function setAttr(selector,name,value){const el=document.querySelector(selector);if(el)el.setAttribute(name,value);}
 function applyLanguage(){
@@ -839,6 +876,11 @@ function applyLanguage(){
   setText("#favoriteFilterBtn .btnText",tr("Favoris","Favourites"));
   setText("#linkedRefsBtn .btnText",tr("Réfs liées","Linked refs"));
   setText("#quickSortBtn .btnText",tr("Tri rapide","Quick sort"));
+  if($("#selectionModeBtn"))$("#selectionModeBtn").textContent=selectionMode?tr("Terminer","Done"):tr("Sélectionner","Select");
+  setText("#manageSectionsBtn",tr("Gérer les intercalaires","Manage sections"));
+  setText("#sectionsTitle",tr("Intercalaires","Sections"));
+  setText("#saveSectionNamesBtn",tr("Enregistrer","Save"));setText("#cancelSectionNamesBtn",tr("Annuler","Cancel"));
+  setText("#batchMoveBtn",tr("Déplacer","Move"));setText("#batchDeleteBtn",tr("Supprimer","Delete"));setText("#batchCancelBtn",tr("Annuler","Cancel"));
   setText("#batchImagesBtn",tr("+ images","+ images")); setText("#addBtn",tr("+ fiche","+ card"));
   setAttr("#grid","aria-label",tr("Fiches visuelles","Visual cards"));
   setText("#editTitle",tr("Fiche visuelle","Visual card"));
@@ -860,7 +902,7 @@ function applyLanguage(){
   setText("#languageSettingsText",tr("Interface en français","Interface in English"));
   const langBtn=document.querySelector("#languageToggleBtn");if(langBtn){langBtn.textContent=isEnglish()?"en-fr":"fr-en";langBtn.title=tr("Passer en anglais","Switch to French");langBtn.setAttribute("aria-label",langBtn.title);}
   const groups=document.querySelectorAll("#settingsDrawer .settingsGroup h3");
-  if(groups[1])groups[1].textContent=tr("Projet / sauvegarde","Project / backup");if(groups[2])groups[2].textContent=tr("Lecture","Playback");if(groups[3])groups[3].textContent=tr("PDF / impression","PDF / print");
+  if(groups[1])groups[1].textContent=tr("Projet / sauvegarde","Project / backup");if(groups[2])groups[2].textContent=tr("Intercalaires","Sections");if(groups[3])groups[3].textContent=tr("Lecture","Playback");if(groups[4])groups[4].textContent=tr("PDF / impression","PDF / print");
   setText("label[for='projectNameSettings']",tr("Titre du projet","Project title"));
   const importZip=document.querySelector("label[for='importZipFile'].btn");if(importZip)importZip.textContent=tr("Importer ZIP","Import ZIP");
   setText("#settingsSaveBtn",tr("Sauvegarder ZIP","Save ZIP"));
@@ -883,9 +925,11 @@ function applyLanguage(){
 }
 
 /* Structure des données enregistrées / Saved-data structure */
-const defaultData = {language:"fr",projectName:"",activeSection:"moodboard",showAll:false,favoriteOnly:false,showLinkedReferences:false,quickSortMode:false,searchActiveSectionOnly:false,saveEditOnClose:true,deleteWithoutConfirm:false,slideshowDelay:3,slideshowTransition:"fade",entries:[]};
+const defaultData = {language:"fr",projectName:"",sectionTitles:{},activeSection:"moodboard",showAll:false,favoriteOnly:false,showLinkedReferences:false,quickSortMode:false,searchActiveSectionOnly:false,saveEditOnClose:true,deleteWithoutConfirm:false,slideshowDelay:3,slideshowTransition:"fade",entries:[]};
 let data = eigrutelEmbedded?structuredClone(defaultData):load();
 let currentEditId = null;
+let selectionMode = false;
+const selectedEntryIds = new Set();
 let undoStack = [];
 let redoStack = [];
 const HISTORY_LIMIT = 40;
@@ -903,7 +947,7 @@ function load(){
   }catch(e){ return structuredClone(defaultData); }
 }
 function normalize(obj){
-  return {language:obj.language==="en"?"en":"fr",projectName:obj.projectName||"",activeSection:obj.activeSection||"moodboard",showAll:!!obj.showAll,favoriteOnly:!!obj.favoriteOnly,showLinkedReferences:!!obj.showLinkedReferences,quickSortMode:!!obj.quickSortMode,searchActiveSectionOnly:obj.searchActiveSectionOnly===true,saveEditOnClose:obj.saveEditOnClose!==false,deleteWithoutConfirm:obj.deleteWithoutConfirm===true,slideshowDelay: Number(obj.slideshowDelay)||3,slideshowTransition: obj.slideshowTransition||"fade",entries:Array.isArray(obj.entries)?obj.entries.map(e=>({image:"",imageId:"",imageStatus:"",originalFileName:"",linkedSections:[],...e,linkedSections:Array.isArray(e.linkedSections)?e.linkedSections:[]})):[]};
+  return {language:obj.language==="en"?"en":"fr",projectName:obj.projectName||"",sectionTitles:obj.sectionTitles&&typeof obj.sectionTitles==="object"?obj.sectionTitles:{},activeSection:obj.activeSection||"moodboard",showAll:!!obj.showAll,favoriteOnly:!!obj.favoriteOnly,showLinkedReferences:!!obj.showLinkedReferences,quickSortMode:!!obj.quickSortMode,searchActiveSectionOnly:obj.searchActiveSectionOnly===true,saveEditOnClose:obj.saveEditOnClose!==false,deleteWithoutConfirm:obj.deleteWithoutConfirm===true,slideshowDelay: Number(obj.slideshowDelay)||3,slideshowTransition: obj.slideshowTransition||"fade",entries:Array.isArray(obj.entries)?obj.entries.map(e=>({image:"",imageId:"",imageStatus:"",originalFileName:"",linkedSections:[],...e,linkedSections:Array.isArray(e.linkedSections)?e.linkedSections:[]})):[]};
 }
 function save(){if(eigrutelEmbedded&&!fardeBinding)return;localStorage.setItem(STORAGE_KEY,JSON.stringify(data));}
 function sectionById(id){return sections.find(s=>s.id===id)||sections[0];}
@@ -1142,6 +1186,8 @@ function currentEntries(){
 /* Affichage des intercalaires et des fiches / Section and card rendering */
 function render(){
   document.body.classList.toggle("quick-sort-mode", !!data.quickSortMode);
+  document.body.classList.toggle("selection-mode", selectionMode);
+  syncBatchActions();
   const favBtn = $("#favoriteFilterBtn"); if(favBtn) favBtn.classList.toggle("active", !!data.favoriteOnly);
   const linkedBtn = $("#linkedRefsBtn");
   if(linkedBtn){
@@ -1188,8 +1234,8 @@ function render(){
     const quickDots = e._linkedRef ? "" : sections.map(s=>`<button class="quickSortDot ${e.section===s.id?'active':''}" type="button" data-quick-section="${esc(s.id)}" data-id="${esc(e.id)}" style="--dotColor:${esc(s.color)}" title="${esc(s.title)}" aria-label="${esc(tr("Classer dans","Move to"))} ${esc(s.title)}"></button>`).join("");
     const linkedBadge = e._linkedRef ? `<span class="linkedBadge">${tr('Réf. liée','Linked ref')}</span>` : '';
     const moveControl = e._linkedRef ? '' : `<button class="cardToolBtn moveBtn" type="button" data-move="${esc(e.id)}" title="${tr("Déplacer","Move")}" aria-label="${tr("Déplacer","Move")}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18"></path><path d="M7 8l5-5 5 5"></path><path d="M7 16l5 5 5-5"></path></svg></button>`;
-    return `<article class="card ${data.quickSortMode&&!e._linkedRef?'quick-sort':''} ${e._linkedRef?'linkedRef':''}" style="--catColor:${sec.color}" data-id="${esc(e.id)}" title="${esc(e.title||sec.title)}">
-      ${e.fav?'<span class="favMark"></span>':''}${linkedBadge}
+    return `<article class="card ${data.quickSortMode&&!e._linkedRef?'quick-sort':''} ${e._linkedRef?'linkedRef':''} ${selectedEntryIds.has(e.id)?'selected':''}" style="--catColor:${sec.color}" data-id="${esc(e.id)}" title="${esc(e.title||sec.title)}">
+      ${e.fav?'<span class="favMark"></span>':''}<span class="cardSelectMark" aria-hidden="true">✓</span>${linkedBadge}
       <div class="cardImage">${img}${label}</div>
       <div class="quickSortPanel" aria-label="Tri rapide">${quickDots}</div>
       <div class="cardControls" aria-label="Actions de la fiche">
@@ -1919,6 +1965,18 @@ function assignEntrySection(id,sectionId){
 
 let dragState = null;
 let justDragged = false;
+function syncBatchActions(){
+  const bar=$("#batchActions"), count=$("#selectionCount"), mode=$("#selectionModeBtn");
+  if(!bar||!count||!mode)return;
+  bar.classList.toggle("hidden",!selectionMode);
+  mode.classList.toggle("active",selectionMode);
+  mode.textContent=selectionMode?tr("Terminer","Done"):tr("Sélectionner","Select");
+  count.textContent=isEnglish()?`${selectedEntryIds.size} selected`:`${selectedEntryIds.size} sélectionnée${selectedEntryIds.size>1?"s":""}`;
+  const target=$("#batchTargetSection");
+  if(target){const current=target.value;target.innerHTML=`<option value="">${esc(tr("Choisir un intercalaire…","Choose a section…"))}</option>`+sections.map(sec=>`<option value="${esc(sec.id)}">${esc(sec.title)}</option>`).join("");if(sections.some(sec=>sec.id===current))target.value=current;}
+  const moveButton=$("#batchMoveBtn");if(moveButton)moveButton.disabled=!selectedEntryIds.size||!target?.value;
+  const deleteButton=$("#batchDeleteBtn");if(deleteButton)deleteButton.disabled=!selectedEntryIds.size;
+}
 function bindCards(){
   grid.querySelectorAll(".zoomBtn").forEach(btn=>{
     btn.addEventListener("pointerdown",e=>e.stopPropagation());
@@ -1944,6 +2002,7 @@ function bindCards(){
   });
   grid.querySelectorAll(".card").forEach(card=>{
     card.addEventListener("click",e=>{
+      if(selectionMode){e.preventDefault();e.stopPropagation();if(!card.classList.contains("linkedRef")){const id=card.dataset.id;selectedEntryIds.has(id)?selectedEntryIds.delete(id):selectedEntryIds.add(id);render();}return;}
       if(e.target.closest(".zoomBtn,.moveBtn,.deleteCardBtn")) return;
       if(justDragged){ e.preventDefault(); e.stopPropagation(); return; }
       openEdit(card.dataset.id);
@@ -2127,6 +2186,22 @@ $("#searchActiveSectionOnly").addEventListener("change",e=>{
 $("#favoriteFilterBtn").addEventListener("click",()=>{data.favoriteOnly=!data.favoriteOnly; save(); render(); status(data.favoriteOnly?tr("Favoris seuls","Favourites only"):tr("Toutes les fiches","All cards"));});
 $("#linkedRefsBtn").addEventListener("click",()=>{if(data.showAll || currentSearchQuery() || data.activeSection==="references") return; data.showLinkedReferences=!data.showLinkedReferences; save(); render(); status(data.showLinkedReferences?tr("Références liées visibles","Linked references visible"):tr("Références liées masquées","Linked references hidden"));});
 $("#quickSortBtn").addEventListener("click",()=>{data.quickSortMode=!data.quickSortMode; save(); render(); status(data.quickSortMode?tr("Tri rapide actif","Quick sort enabled"):tr("Tri rapide désactivé","Quick sort disabled"));});
+$("#batchTargetSection").addEventListener("change",syncBatchActions);
+$("#selectionModeBtn").addEventListener("click",()=>{selectionMode=!selectionMode;if(!selectionMode)selectedEntryIds.clear();render();});
+$("#batchCancelBtn").addEventListener("click",()=>{selectionMode=false;selectedEntryIds.clear();render();});
+$("#batchMoveBtn").addEventListener("click",()=>{
+  const ids=[...selectedEntryIds];if(!ids.length)return;
+  const target=$("#batchTargetSection").value;if(!target)return;const entries=data.entries.filter(entry=>ids.includes(entry.id));
+  if(!entries.length)return;
+  pushHistory("Déplacer plusieurs fiches");entries.forEach(entry=>{entry.section=target;if(target!=="references")entry.linkedSections=[];});
+  selectedEntryIds.clear();selectionMode=false;save();render();status(tr(`${entries.length} fiches déplacées vers ${sectionById(target).title}`,`${entries.length} cards moved to ${sectionById(target).title}`));
+});
+$("#batchDeleteBtn").addEventListener("click",()=>{
+  const ids=[...selectedEntryIds];if(!ids.length)return;
+  if(!data.deleteWithoutConfirm&&!confirm(tr(`Supprimer ${ids.length} fiches sélectionnées ?`,`Delete ${ids.length} selected cards?`)))return;
+  const idSet=new Set(ids);const count=data.entries.filter(entry=>idSet.has(entry.id)).length;if(!count)return;
+  pushHistory("Supprimer plusieurs fiches");data.entries=data.entries.filter(entry=>!idSet.has(entry.id));selectedEntryIds.clear();selectionMode=false;save();render();status(tr(`${count} fiches supprimées`,`${count} cards deleted`));
+});
 $("#addBtn").addEventListener("click",()=>openEdit(null));
 $("#batchImagesBtn").addEventListener("click",()=>$("#batchImageFiles").click());
 $("#batchImageFiles").addEventListener("change",importBatchImages);
@@ -2138,6 +2213,19 @@ $("#undoBtn").addEventListener("click",undo);
 $("#redoBtn").addEventListener("click",redo);
 $("#closeSettings").addEventListener("click",closeSettings);
 $("#settingsDrawer").addEventListener("click",e=>{if(e.target.id==="settingsDrawer")closeSettings();});
+function openSections(){
+  $("#sectionNameFields").innerHTML=sections.map(sec=>`<label class="sectionNameField" style="--sectionColor:${esc(sec.color)}"><span class="sectionNameDot"></span><input type="text" data-section-name="${esc(sec.id)}" value="${esc(data.sectionTitles[sec.id]|| (isEnglish()?sec.enTitle:sec.frTitle))}" aria-label="${esc(sec.title)}"></label>`).join("");
+  $("#sectionsDrawer").classList.add("open");$("#sectionsDrawer").setAttribute("aria-hidden","false");
+}
+function closeSections(){$("#sectionsDrawer").classList.remove("open");$("#sectionsDrawer").setAttribute("aria-hidden","true");}
+$("#manageSectionsBtn").addEventListener("click",openSections);
+$("#closeSections").addEventListener("click",closeSections);$("#cancelSectionNamesBtn").addEventListener("click",closeSections);
+$("#sectionsDrawer").addEventListener("click",e=>{if(e.target.id==="sectionsDrawer")closeSections();});
+$("#saveSectionNamesBtn").addEventListener("click",()=>{
+  const next={...data.sectionTitles};$("#sectionNameFields").querySelectorAll("[data-section-name]").forEach(input=>{const value=input.value.trim();const sec=sectionById(input.dataset.sectionName);const defaultName=isEnglish()?sec.enTitle:sec.frTitle;if(value&&value!==defaultName)next[sec.id]=value;else delete next[sec.id];});
+  pushHistory("Renommer les intercalaires");data.sectionTitles=next;save();closeSections();applyLanguage();status(tr("Noms des intercalaires enregistrés","Section names saved"));
+});
+
 $("#saveEditOnClose").addEventListener("change",e=>{data.saveEditOnClose=e.target.checked; save(); status(data.saveEditOnClose?"Fermeture : enregistrer":"Fermeture : ignorer");});
 $("#deleteWithoutConfirm").addEventListener("change",e=>{data.deleteWithoutConfirm=e.target.checked; save(); status(tr(data.deleteWithoutConfirm?"Suppression directe activée":"Confirmation de suppression activée",data.deleteWithoutConfirm?"Direct deletion enabled":"Deletion confirmation enabled"));});
 
